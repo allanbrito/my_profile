@@ -99,7 +99,7 @@ function self_commit {
 	git commit -am "$1"
 	git pull origin master
 	git push
-	cd "$path"
+	cd "/$path"
 }
 
 if [[ "$atualiza_bashrc" == true ]] ; then
