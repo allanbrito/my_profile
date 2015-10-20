@@ -1,3 +1,8 @@
+						############################################################################################
+						# 						           @author Allan Brito                                     #
+						#  Se a váriável atualiza_bashrc estiver setada com true, qualquer alteração será perdida  #
+						############################################################################################
+
 #variables
 now=$(date +"%Y%m%d_%H%M")
 windows=false
@@ -67,16 +72,21 @@ alias moobidb=$root/sindicalizi/moobilib/scripts/moobidb.php
 #functions
 function update_self {
 	local path="${PWD##/}"
-	echo "Atualizando .bashrc"
 	if [[ ! -d ~/my_profile ]]; then
 		mkdir -p ~/my_profile
 		cd ~/my_profile
 		git init
 		git remote add origin https://github.com/allanbrito/my_profile.git
 	fi
-	cd ~/my_profile
-	git pull origin master
-	cd "/$path"
+	read -r -p "Deseja atualizar as funções? [S/n] " response
+	case $response in
+		[sS][iI][mM]|[sS])
+			cd ~/my_profile
+			git pull origin master
+			cp .bashrc ../.bashrc
+			cd "/$path"
+		;;
+	esac
 }
 
 if [[ "$atualiza_bashrc" == true ]] ; then
@@ -185,13 +195,14 @@ function migrate_create {
 		touch $migrations/"$hora"_"$1".sql
 		if [[ "$2" != "" ]] ; then
 			local nome="$hora"_"$1".sql
-			read -r -p "Deseja marcar a migration \"$nome\" no banco \"$2\" local? [S/N] " response
+			read -r -p "Deseja marcar a migration \"$nome\" no banco \"$2\" local? [S/n] " response
 			case $response in
 				[sS][iI][mM]|[sS])
 					migration -s "$2" --mark "$hora"_"$1".sql
-					;;
+				;;
 				*)
-					;;
+					clear
+				;;
 			esac
 		fi
 	fi
