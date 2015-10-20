@@ -5,7 +5,8 @@ linux=false
 mac=false
 root=/var/www
 config=~/.bashconfig
-default_params="baixa_por_ssh=false
+default_params="atualiza_bashrc=true
+baixa_por_ssh=false
 local_host=192.168.25.200
 local_user=root
 local_pass=
@@ -64,6 +65,24 @@ migrations=$root/sindicalizi/migrations/
 alias moobidb=$root/sindicalizi/moobilib/scripts/moobidb.php
 
 #functions
+function update_self {
+	local path="${PWD##/}"
+	echo "Atualizando .bashrc"
+	if [[ ! -d ~/my_profile ]]; then
+		mkdir -p ~/my_profile
+		cd ~/my_profile
+		git init
+		git remote add origin https://github.com/allanbrito/my_profile.git
+	fi
+	cd ~/my_profile
+	git pull origin master
+	cd "/$path"
+}
+
+if [[ "$atualiza_bashrc" == true ]] ; then
+	update_self
+fi
+
 function m {
 	local host="$local_host"
 	local user="$local_user"
@@ -110,7 +129,7 @@ function git_commit {
 			;;
 			* )	
 				mensagem="$mensagem $1"
-			;;\
+			;;
 		esac
 		shift
 	done
