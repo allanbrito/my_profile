@@ -70,7 +70,7 @@ migrations=$root/sindicalizi/migrations/
 alias moobidb=$root/sindicalizi/moobilib/scripts/moobidb.php
 
 #functions
-function update_self {
+function self_update {
 	local path="${PWD##/}"
 	if [[ ! -d ~/my_profile ]]; then
 		mkdir -p ~/my_profile
@@ -85,12 +85,13 @@ function update_self {
 			git pull origin master
 			cp .bashrc ../.bashrc
 			cd "/$path"
+			sleep 3
 		;;
 	esac
 	clear
 }
 
-function commit_self {
+function self_commit {
 	local path="${PWD##/}"
 	cd ~/my_profile
 	cp ../.bashrc .bashrc
@@ -102,7 +103,7 @@ function commit_self {
 }
 
 if [[ "$atualiza_bashrc" == true ]] ; then
-	update_self
+	self_update
 fi
 
 function m {
