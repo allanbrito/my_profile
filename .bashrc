@@ -9,6 +9,7 @@ windows=false
 linux=false
 mac=false
 root=/var/www
+whoami=$(id -u -n)
 config=~/.bashconfig
 default_params="atualiza_bashrc=true
 baixa_por_ssh=false
@@ -69,7 +70,18 @@ esac
 migrations=$root/sindicalizi/migrations/
 alias moobidb=$root/sindicalizi/moobilib/scripts/moobidb.php
 
-#functions
+#auto_update
+function self_commit {
+	local path="${PWD##/}"
+	cd ~/my_profile
+	cp ../.bashrc .bashrc
+	git add .
+	git commit -am "$1"
+	git pull origin master
+	git push
+	cd "/$path"
+}
+
 function self_update {
 	local path="${PWD##/}"
 	if [[ ! -d ~/my_profile ]]; then
@@ -91,21 +103,28 @@ function self_update {
 	clear
 }
 
-function self_commit {
+if [[ "$atualiza_bashrc" == true ]] ; then
+	self_update
+fi
+
+function sublime_commit {
 	local path="${PWD##/}"
+	cp -avr ~/AppData/Roaming/Sublime\ Text\ 3/Packages/ ~/my_profile/Sublime_"$whoami"
 	cd ~/my_profile
-	cp ../.bashrc .bashrc
 	git add .
-	git commit -am "$1"
+	git commit -am "Sublime preferences"
 	git pull origin master
 	git push
 	cd "/$path"
 }
 
-if [[ "$atualiza_bashrc" == true ]] ; then
-	self_update
-fi
+function sublime_update {
+	cp -avr ~/my_profile/Sublime_"$whoami" ~/AppData/Roaming/Sublime\ Text\ 3/Packages/
+	clear
+	echo "Sublime atualizado!"
+}
 
+#functions
 function m {
 	local host="$local_host"
 	local user="$local_user"
