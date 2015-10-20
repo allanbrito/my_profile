@@ -87,6 +87,18 @@ function update_self {
 			cd "/$path"
 		;;
 	esac
+	clear
+}
+
+function commit_self {
+	local path="${PWD##/}"
+	cd ~/my_profile
+	cp ../.bashrc .bashrc
+	git add .
+	git commit -am "$1"
+	git pull origin master
+	git push
+	cd "$path"
 }
 
 if [[ "$atualiza_bashrc" == true ]] ; then
@@ -199,9 +211,6 @@ function migrate_create {
 			case $response in
 				[sS][iI][mM]|[sS])
 					migration -s "$2" --mark "$hora"_"$1".sql
-				;;
-				*)
-					clear
 				;;
 			esac
 		fi
