@@ -109,6 +109,11 @@ function self_init {
 	fi
 }
 
+function self_reset {
+	if [[ "$windows" == true ]] ; then
+		"C:\Program Files (x86)\Git\bin\sh.exe" --login -i
+	fi
+}
 function self_update {
 	git -C "$path_profile" fetch
 	if [[ $(git -C "$path_profile" rev-parse HEAD) != $(git -C "$path_profile" rev-parse origin/master) ]]; then
@@ -118,9 +123,8 @@ function self_update {
 				cd "$path_profile"
 				git pull origin master
 				cp .bashrc ../.bashrc
-				if [[ "$windows" == true ]] ; then
-					"C:\Program Files (x86)\Git\bin\sh.exe" --login -i
-				fi
+				self_reset
+				
 			;;
 		esac
 	fi	
@@ -181,7 +185,7 @@ function m {
 }
 
 function s {
-	m -r
+	m -r "$@"
 }
 
 function x {
@@ -234,7 +238,7 @@ function git_update {
 }
 
 function migration {
-	moobidb --no-ansi $@
+	moobidb --no-ansi "$@"
 }
 
 function migrate_local {
@@ -343,9 +347,8 @@ function backup {
 		else
 			path=local_"$banco"_$now
 		fi
-		local escapedpath="$path"
 		if [[ $tabelas != "" ]] ; then
-			path="$path_($tabelas)"
+			path="$path"_"($tabelas)"
 		fi
 		mkdir -p ~/backups/"$banco"
 		path="$path".sql
@@ -437,6 +440,8 @@ function upload {
 			pass="$remote_pass"
 		fi
 		mysql -u "$user" -h "$host" -p"$pass" sindical_"$banco" < "$path"
+		[[ $banco == sispag* && $remote == false ]] && echo "Alterando ema_url_ws para local" && m "$banco" "update ema_empresa set ema_url_ws = replace(replace(ema_url_ws, '.sindicalizi.com.br',''), 'http://', 'http://localhost/')  where ema_url_ws like '%.sindicalizi.com.br/sispagintegracao/';"
+		[[ $banco == sispag* && $remote == true ]] && echo "Alterando ema_url_ws para remote" && m "$banco" "update ema_empresa set ema_url_ws = replace(replace(ema_url_ws, 'localhost/', ''), '/sispagintegracao/', '.sindicalizi.com.br/sispagintegracao/') where ema_url_ws like 'http://localhost/%' and ema_url_ws not like 'http://localhost/sispagintegracao/';"
 	fi
 }
 
