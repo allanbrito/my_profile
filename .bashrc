@@ -138,17 +138,15 @@ fi
 
 function sublime_commit {
 	local path="${PWD##/}"
-	cp -avr ~/AppData/Roaming/Sublime\ Text\ 3/Packages/ "$path_profile"/Sublime_"$whoami"
-	cd "$path_profile"
-	git add .
-	git commit -am "Sublime preferences"
-	git pull origin master
-	git push
-	cd "/$path"
+	tar -zcvf "$path_profile"/Sublime_"$whoami".tar -C ~/AppData/Roaming/Sublime\ Text\ 3/Packages/ .
+	git -C "$path_profile" add .
+	git -C "$path_profile" commit -am "Sublime preferences"
+	git -C "$path_profile" pull origin master
+	git -C "$path_profile" push
 }
 
 function sublime_update {
-	cp -avr "$path_profile"/Sublime_"$whoami" ~/AppData/Roaming/Sublime\ Text\ 3/Packages/
+	tar -zxvf  "$path_profile"/Sublime_"$whoami".tar -C ~/AppData/Roaming/Sublime\ Text\ 3/Packages/
 	clear
 	echo "Sublime atualizado!"
 }
