@@ -85,7 +85,8 @@ function self_commit {
 			cp ../.bashrc .bashrc
 			git add .
 			git commit -am "$msg"
-			git pull origin master && git push
+			git pull origin master && 
+			git push origin master
 			cd "/$path"
 			clear
 		;;
