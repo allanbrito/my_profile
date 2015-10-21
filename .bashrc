@@ -75,12 +75,13 @@ alias moobidb=$path_root/sindicalizi/moobilib/scripts/moobidb.php
 function self_commit {
 	read -r -p "Existem alterações, deseja [V]er ou [C]ommitar? [C/v/*] " response
 	case $response in
-		[cC])
+		[cC*])
 			local path="${PWD##/}"
 			cd "$path_profile"
 			cp ../.bashrc .bashrc
 			git add .
-			git commit -am "${1:-bash_update}"
+			response="${response#[Cc] }"
+			git commit -am "${response:-bash_update}"
 			git pull origin master
 			git push
 			cd "/$path"
@@ -115,7 +116,7 @@ function self_update {
 			[sS][iI][mM]|[sS])
 				cd "$path_profile"
 				git pull origin master
-				cp .bashrc ../.bancoashrc
+				cp .bashrc ../.bashrc
 				exit
 			;;
 		esac
