@@ -118,7 +118,9 @@ function self_update {
 				cd "$path_profile"
 				git pull origin master
 				cp .bashrc ../.bashrc
-				exit
+				if [[ "$windows" == true ]] ; then
+					"C:\Program Files (x86)\Git\bin\sh.exe" --login -i
+				fi
 			;;
 		esac
 	fi	
