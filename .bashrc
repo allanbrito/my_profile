@@ -10,7 +10,7 @@ linux=false
 mac=false
 path_root=/var/www
 whoami=$(id -u -n)
-path_config=.config
+path_config=.bashconfig
 path_profile=~/my_bash
 default_params="atualiza_bashrc=true
 baixa_por_ssh=false
@@ -112,7 +112,6 @@ function self_init {
 function self_update {
 	git -C "$path_profile" fetch
 	if [[ $(git -C "$path_profile" rev-parse HEAD) != $(git -C "$path_profile" rev-parse origin/master) ]]; then
-	echo
 		read -r -p "Deseja atualizar as funções? [S/n] " response
 		case $response in
 			[sS][iI][mM]|[sS])
