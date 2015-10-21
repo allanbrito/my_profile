@@ -94,7 +94,7 @@ function self_commit {
 			git diff --no-index -- "$path_profile"/.bashrc "$path_profile"/../.bashrc
 			self_commit
 		;;
-		*)
+		"")
 			self_commit
 		;;
 	esac 
@@ -112,6 +112,7 @@ function self_init {
 function self_update {
 	git -C "$path_profile" fetch
 	if [[ $(git -C "$path_profile" rev-parse HEAD) != $(git -C "$path_profile" rev-parse @{u}) ]]; then
+	echo
 		read -r -p "Deseja atualizar as funções? [S/n] " response
 		case $response in
 			[sS][iI][mM]|[sS])
