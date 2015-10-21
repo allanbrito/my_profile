@@ -188,7 +188,7 @@ function x {
 	cd $path_root/"$1"
 }
 
-alias gtc=git_commit
+alias gtc="git_commit --"
 
 function git_commit {
 	local update=true
@@ -224,7 +224,7 @@ function git_update {
 		cd sisfinanc 
 		git pull || true
 	else
-		echo "  sisfinanc, env e var:"
+		echo "  env e var:"
 	fi
 	x env 
 	git pull || true 
@@ -470,60 +470,26 @@ function restore {
 
 #doc
 function help {
-	local funcoes=(mysql_local mysql_remote goto_root git_commit migration migrate_create migrate_local migrate_remote migrate_especifica backup_local backup_remote upload_local upl_remote dump restore)
-	
-	if [[ "$1" == "" ]] ; then
-		echo "    m: acessa o banco local"
-		echo "    s: acesso a banco remoto"
-		echo "    x: vai para a pasta htdocs"
-		echo "    gtc: adiciona, commita, dá pull dá push e atualiza dependências"
-		echo "    migration: migration"
-		echo "    migrate_create: Cria arquivo na pasta migration já no padrão. Aceita o nome da migration e um banco local (opcional)"
-		echo "    migrate_local: executa migrations local"
-		echo "    migrate_remote: executa migrations remote"
-		echo "    migrate_especifica: executa uma migration especifica"
-		echo "    backup_local: faz bkp da 200 passando banco e tabelas (opcional)"
-		echo "    backup_remote: faz bkp do remote passando banco e tabelas (opcional)"
-		echo "    upload_local: faz restore local passando banco e arquivo"
-		echo "    upl_remote: faz restore remote passando banco e arquivo. Pergunta se tem certeza"
-		echo "    dump: bkp remote e upl local passando apenas o banco"
-		echo "    restore: bkp local e upl remote passando apenas o banco. Pergunta se tem certeza"
+	if [[ "$1" != "" ]] ; then
+		if [[ -f "$path_profile"/help/"$1" ]]; then
+			cat "$path_profile"/help/"$1"
+		else
+			echo "$1: Ainda não documentada"
+		fi
 	else
-		case $1 in
-			migrate)
-				migrate_local -help
-			;;
-			migrates)
-				migrate_remote -help
-			;;
-			migrateo)
-				migrate_especifica -help
-			;;
-			migratec)
-				migrate_create -help
-			;;
-			bkp)
-				backup -help
-			;;
-			bkpl)
-				backup_local -help
-			;;
-			bkpr)
-				backup_remote -help
-			;;
-			upl)
-				upload -help
-			;;
-			upll)
-				upload_local -help
-			;;
-			uplr)
-				upl_remote -help
-			;;
-			* )	
-				$1 -help
-			;;
-		esac
+		local funcoes=($(grep "function\ " ~/.bashrc | sed 's/function//' | sed 's/ {//'))
+		local falta_documentar=
+		for i in "${funcoes[@]}"
+		do :
+			if [[ -f "$path_profile"/help/"$i" ]]; then
+				cat "$path_profile"/help/"$i"
+				echo 
+			else
+				falta_documentar="$falta_documentar\n$i: Ainda não documentada"
+			fi
+		done
+
+		printf "$falta_documentar"
 	fi
 }
 

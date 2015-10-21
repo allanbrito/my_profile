@@ -1,0 +1,1 @@
+migrate_create: Cria arquivo na pasta migration já no padrão. Aceita o nome da migration e um banco local (opcional)
