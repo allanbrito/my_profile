@@ -40,7 +40,7 @@ alias mysqldump=mysqldump
 alias php=php
 
 #exec
-clear
+# clear
 set -o noglob
 
 #iniciar arquivo de configuração
