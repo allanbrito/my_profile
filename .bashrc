@@ -489,7 +489,7 @@ function help {
 			fi
 		done
 
-		printf "$falta_documentar"
+		echo -e "$falta_documentar"
 	fi
 }
 
