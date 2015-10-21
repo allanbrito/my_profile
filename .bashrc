@@ -73,6 +73,8 @@ alias moobidb=$path_root/sindicalizi/moobilib/scripts/moobidb.php
 
 #auto_update
 function self_commit {
+	# read -r -p "Deseja atualizar as funções? [S/n] " response
+	clear
 	read -r -p "Existem alterações, deseja [V]er ou [C]ommitar? [C/v/*] " response
 	case $response in
 		[cC*])
@@ -89,11 +91,9 @@ function self_commit {
 		;;
 		[vV])
 			git diff --no-index -- "$path_profile"/.bashrc "$path_profile"/../.bashrc
-			clear
 			self_commit
 		;;
-		"")
-			clear
+		*)
 			self_commit
 		;;
 	esac 
