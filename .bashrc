@@ -77,13 +77,14 @@ function self_commit {
 	clear
 	read -r -p "Existem alterações, deseja [V]er ou [C]ommitar? [C/v/*] " response
 	case $response in
-		[cC*])
+		[cC])
 			local path="${PWD##/}"
+			read -r -p "Mensagem do commit: " msg
+			msg=${msg:-bash_update}
 			cd "$path_profile"
 			cp ../.bashrc .bashrc
 			git add .
-			response="${response#[Cc] }"
-			git commit -am "${response:-bash_update}"
+			git commit -am "$msg"
 			git pull origin master
 			git push
 			cd "/$path"
