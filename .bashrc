@@ -8,9 +8,10 @@ now=$(date +"%Y%m%d_%H%M")
 windows=false
 linux=false
 mac=false
-root=/var/www
+path_root=/var/www
 whoami=$(id -u -n)
-config=~/.bashconfig
+path_config=~/my_bash/.config
+path_profile=~/my_bash
 default_params="atualiza_bashrc=true
 baixa_por_ssh=false
 local_host=192.168.25.200
@@ -20,7 +21,7 @@ remote_host=sindicalizi.com.br
 remote_user=sindical
 remote_pass="
 
-#alias
+#atalhos
 alias ls='ls -F --show-control-chars'
 alias gts='git status '
 alias e='exit'
@@ -43,13 +44,13 @@ clear
 set -o noglob
 
 #iniciar arquivo de configuração
-( [ -e "$config" ] || (touch "$config" && echo "$default_params" > "$config"))
+mkdir -p "$path_profile"
+( [ -e "$path_config" ] || (touch "$path_config" && echo "$default_params" > "$path_config"))
 eval "$default_params"
 while read linha 
 do
     eval "$linha"
-done < "$config"
-
+done < "$path_config"
 case "$(uname -s)" in
 	Darwin)
 		mac=true
@@ -59,58 +60,82 @@ case "$(uname -s)" in
 	;;
 	CYGWIN*|MINGW32*|MSYS*)
 		windows=true
-		root=/c/xampp/htdocs
-		alias mysql=$root/../mysql/bin/mysql.exe
-		alias mysqldump=$root/../mysql/bin/mysqldump.exe
-		alias php=$root/../php/php.exe
+		path_root=/c/xampp/htdocs
+		alias mysql=$path_root/../mysql/bin/mysql.exe
+		alias mysqldump=$path_root/../mysql/bin/mysqldump.exe
+		alias php=$path_root/../php/php.exe
 	;;
 esac
 
 #alias || variables pt2
-migrations=$root/sindicalizi/migrations/
-alias moobidb=$root/sindicalizi/moobilib/scripts/moobidb.php
+migrations=$path_root/sindicalizi/migrations/
+alias moobidb=$path_root/sindicalizi/moobilib/scripts/moobidb.php
 
 #auto_update
 function self_commit {
-	local path="${PWD##/}"
-	cd ~/my_profile
-	cp ../.bashrc .bashrc
-	git add .
-	git commit -am "$1"
-	git pull origin master
-	git push
-	cd "/$path"
+	read -r -p "Existem alterações, deseja [V]er ou [C]ommitar? [C/v/*] " response
+	case $response in
+		[cC])
+			local path="${PWD##/}"
+			cd "$path_profile"
+			cp ../.bashrc .bashrc
+			git add .
+			git commit -am "${1:-bash_update}"
+			git pull origin master
+			git push
+			cd "/$path"
+			clear
+		;;
+		[vV])
+			git diff --no-index -- "$path_profile"/.bashrc "$path_profile"/../.bashrc
+			clear
+			self_commit
+		;;
+		"")
+			clear
+			self_commit
+		;;
+	esac 
+}
+
+function self_init {
+	if [ ! -d "$path_profile"/.git ]; then
+		git -C "$path_profile" init 
+		git -C "$path_profile" remote add origin https://github.com/allanbrito/my_profile.git 
+		git -C "$path_profile" fetch --all
+		git -C "$path_profile" pull origin master
+	fi
 }
 
 function self_update {
-	local path="${PWD##/}"
-	if [[ ! -d ~/my_profile ]]; then
-		mkdir -p ~/my_profile
-		cd ~/my_profile
-		git init
-		git remote add origin https://github.com/allanbrito/my_profile.git
-	fi
-	read -r -p "Deseja atualizar as funções? [S/n] " response
-	case $response in
-		[sS][iI][mM]|[sS])
-			cd ~/my_profile
-			git pull origin master
-			cp .bashrc ../.bashrc
-			cd "/$path"
-			sleep 3
-		;;
-	esac
-	clear
+	git -C "$path_profile" fetch
+	if [[ $(git -C "$path_profile" rev-parse HEAD) != $(git -C "$path_profile" rev-parse @{u}) ]]; then
+		read -r -p "Deseja atualizar as funções? [S/n] " response
+		case $response in
+			[sS][iI][mM]|[sS])
+				cd "$path_profile"
+				git pull origin master
+				cp .bashrc ../.bancoashrc
+				exit
+			;;
+		esac
+		clear
+	fi	
 }
 
 if [[ "$atualiza_bashrc" == true ]] ; then
-	self_update
+	self_init 
+	if [[ $(diff "$path_profile"/.bashrc "$path_profile"/../.bashrc) ]]; then 
+		self_commit
+	else 
+		self_update
+	fi
 fi
 
 function sublime_commit {
 	local path="${PWD##/}"
-	cp -avr ~/AppData/Roaming/Sublime\ Text\ 3/Packages/ ~/my_profile/Sublime_"$whoami"
-	cd ~/my_profile
+	cp -avr ~/AppData/Roaming/Sublime\ Text\ 3/Packages/ "$path_profile"/Sublime_"$whoami"
+	cd "$path_profile"
 	git add .
 	git commit -am "Sublime preferences"
 	git pull origin master
@@ -119,10 +144,12 @@ function sublime_commit {
 }
 
 function sublime_update {
-	cp -avr ~/my_profile/Sublime_"$whoami" ~/AppData/Roaming/Sublime\ Text\ 3/Packages/
+	cp -avr "$path_profile"/Sublime_"$whoami" ~/AppData/Roaming/Sublime\ Text\ 3/Packages/
 	clear
 	echo "Sublime atualizado!"
 }
+
+
 
 #functions
 function m {
@@ -156,7 +183,7 @@ function s {
 }
 
 function x {
-	cd $root/"$1"
+	cd $path_root/"$1"
 }
 
 alias gtc=git_commit
@@ -322,9 +349,14 @@ function backup {
 		path="$path".sql
 		fullpath=~/backups/"$banco"/"$path"
 		if [[ $baixa_por_ssh == true && $remote == true && $ssh != "" ]] ; then
-			ssh.exe "$ssh" "mysqldump -u $user -p$pass sindical_$banco $tabelas --ignore-table=sindical_$banco.log_log > /tmp/$banco.sql && gzip -f /tmp/$banco.sql" && scp sindicalizi:/tmp/"$banco".sql.gz ~/backups/temp.gz && gunzip -c ~/backups/temp.gz > "$fullpath" && rm ~/backups/temp.gz && sed -i 's/DEFAULT CURRENT_TIMESTAMP//g' "$fullpath"
+			ssh.exe "$ssh" "mysqldump -u $user -p$pass sindical_$banco $tabelas --ignore-table=sindical_$banco.log_log > /tmp/$banco.sql && gzip -f /tmp/$banco.sql"
+			scp sindicalizi:/tmp/"$banco".sql.gz ~/backups/temp.gz 
+			gunzip -c ~/backups/temp.gz > "$fullpath"
+			rm ~/backups/temp.gz 
+			sed -i 's/DEFAULT CURRENT_TIMESTAMP//g' "$fullpath"
 		else
-			mysqldump -u "$user" -p"$pass" -h "$host" sindical_"$banco" $tabelas --ignore-table=sindical_"$banco".log_log > "$fullpath" && sed -i 's/DEFAULT CURRENT_TIMESTAMP//g' "$fullpath"
+			mysqldump -u "$user" -p"$pass" -h "$host" sindical_"$banco" $tabelas --ignore-table=sindical_"$banco".log_log > "$fullpath" 
+			sed -i 's/DEFAULT CURRENT_TIMESTAMP//g' "$fullpath"
 		fi
 	fi
 }
@@ -425,15 +457,19 @@ function upl_remote {
 }
 
 function dump {
-	bkpr $@ && upll $@ -path "$fullpath"
+	bkpr $@ 
+	upll $@ -path "$fullpath"
 }
 
 function restore {
-	bkpl $@ && uplr $@ -path "$fullpath"
+	bkpl $@ 
+	uplr $@ -path "$fullpath"
 }
 
 #doc
 function help {
+	local funcoes=(mysql_local mysql_remote goto_root git_commit migration migrate_create migrate_local migrate_remote migrate_especifica backup_local backup_remote upload_local upl_remote dump restore)
+	
 	if [[ "$1" == "" ]] ; then
 		echo "    m: acessa o banco local"
 		echo "    s: acesso a banco remoto"
