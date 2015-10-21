@@ -10,7 +10,7 @@ linux=false
 mac=false
 path_root=/var/www
 whoami=$(id -u -n)
-path_config=~/my_bash/.config
+path_config=.config
 path_profile=~/my_bash
 default_params="atualiza_bashrc=true
 baixa_por_ssh=false
