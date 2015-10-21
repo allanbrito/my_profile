@@ -88,7 +88,6 @@ function self_commit {
 			git pull origin master && 
 			git push origin master
 			cd "/$path"
-			clear
 		;;
 		[vV])
 			git diff --no-index -- "$path_profile"/.bashrc "$path_profile"/../.bashrc
@@ -121,7 +120,6 @@ function self_update {
 				exit
 			;;
 		esac
-		clear
 	fi	
 }
 
@@ -132,6 +130,7 @@ if [[ "$atualiza_bashrc" == true ]] ; then
 	else 
 		self_update
 	fi
+	clear
 fi
 
 function sublime_commit {
