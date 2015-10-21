@@ -234,7 +234,7 @@ function git_update {
 }
 
 function migration {
-	php moobidb --no-ansi $@
+	moobidb --no-ansi $@
 }
 
 function migrate_local {
