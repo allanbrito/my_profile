@@ -111,7 +111,7 @@ function self_init {
 
 function self_update {
 	git -C "$path_profile" fetch
-	if [[ $(git -C "$path_profile" rev-parse HEAD) != $(git -C "$path_profile" rev-parse @{u}) ]]; then
+	if [[ $(git -C "$path_profile" rev-parse HEAD) != $(git -C "$path_profile" rev-parse origin/master) ]]; then
 	echo
 		read -r -p "Deseja atualizar as funções? [S/n] " response
 		case $response in
