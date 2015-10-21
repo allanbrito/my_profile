@@ -105,6 +105,7 @@ function self_init {
 		git -C "$path_profile" remote add origin https://github.com/allanbrito/my_profile.git 
 		git -C "$path_profile" fetch --all
 		git -C "$path_profile" pull origin master
+		cp .bashrc ../.bashrc
 	fi
 }
 
