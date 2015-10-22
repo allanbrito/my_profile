@@ -27,22 +27,12 @@ remote_pass="
 alias ls='ls -F --show-control-chars'
 alias gts='git status '
 alias e='exit'
-alias migrate=migrate_local
-alias migrates=migrate_remote
-alias migrateo=migrate_especifica
-alias migratec=migrate_create
-alias bkp=backup
-alias bkpl=backup_local
-alias bkpr=backup_remote
-alias upl=upload
-alias upll=upload_local
-alias uplr=upl_remote
 alias mysql=mysql
 alias mysqldump=mysqldump
 alias php=php
 
 #exec
-# clear
+clear
 set -o noglob
 
 #iniciar arquivo de configuração
@@ -74,7 +64,7 @@ migrations=$path_root/sindicalizi/migrations/
 alias moobidb=$path_root/sindicalizi/moobilib/scripts/moobidb.php
 
 #auto_update
-function self_commit {
+function bash_commit {
 	# read -r -p "Deseja atualizar as funções? [S/n] " response
 	clear
 	read -r -p "Existem alterações, deseja [V]er ou [C]ommitar? [C/v/*] " response
@@ -93,15 +83,15 @@ function self_commit {
 		;;
 		[vV])
 			git diff --no-index -- "$path_profile"/.bashrc "$path_profile"/../.bashrc
-			self_commit
+			bash_commit
 		;;
 		"")
-			self_commit
+			bash_commit
 		;;
 	esac 
 }
 
-function self_init {
+function bash_init {
 	if [ ! -d "$path_profile"/.git ]; then
 		git -C "$path_profile" init 
 		git -C "$path_profile" remote add origin https://github.com/allanbrito/my_profile.git 
@@ -111,14 +101,14 @@ function self_init {
 	fi
 }
 
-function self_reset {
+function bash_reset {
 	if [[ "$windows" == true ]] ; then
 		"C:\Program Files (x86)\Git\bin\sh.exe" --login -i
 	fi
 }
-alias reset=self_reset
+alias reset=bash_reset
 
-function self_update {
+function bash_update {
 	git -C "$path_profile" fetch
 	if [[ $(git -C "$path_profile" rev-parse HEAD) != $(git -C "$path_profile" rev-parse origin/master) ]]; then
 		read -r -p "Deseja atualizar as funções? [S/n] " response
@@ -127,7 +117,7 @@ function self_update {
 				cd "$path_profile"
 				git pull origin master
 				cp .bashrc ../.bashrc
-				self_reset
+				bash_reset
 				
 			;;
 		esac
@@ -135,11 +125,11 @@ function self_update {
 }
 
 if [[ "$atualiza_bashrc" == true ]] ; then
-	self_init 
+	bash_init 
 	if [[ $(diff "$path_profile"/.bashrc "$path_profile"/../.bashrc) ]]; then 
-		self_commit
+		bash_commit
 	else 
-		self_update
+		bash_update
 	fi
 	clear
 fi
@@ -173,10 +163,8 @@ function sublime_update {
 	fi
 }
 
-
-
 #functions
-function m {
+function mysql_local {
 	local host="$local_host"
 	local user="$local_user"
 	local pass="$local_pass"
@@ -201,16 +189,18 @@ function m {
 		mysql $connection sindical_$banco -e "$sql" || mysql $connection
 	fi
 }
+alias mysql=mysql_local
+alias m=mysql_local
 
-function s {
-	m -r "$@"
+function mysql_sindicalizi {
+	mysql -r "$@"
 }
+alias s=mysql_sindicalizi
 
-function x {
+function path_root {
 	cd $path_root/"$1"
 }
-
-alias gtc="git_commit --"
+alias x=path_root
 
 function git_commit {
 	local update=true
@@ -236,8 +226,7 @@ function git_commit {
 		fi
 	fi
 }
-
-alias gtu=git_update
+alias gtc="git_commit --"
 
 function git_update {
 	local path="${PWD##/}"
@@ -254,24 +243,23 @@ function git_update {
 	git pull || true 
 	cd "/$path"
 }
+alias gtu=git_update
 
 function migration {
 	moobidb --no-ansi "$@"
 }
 
-function migrate_local {
+function migration_local_todas {
 	migration --migrate --all "$@"
 }
+alias migrate=migration_local_todas
 
-function migrate_remote {
+function migration_remote_todas {
 	migration --migrate --prod --all "$@"
 }
+alias migrates=migration_remote_todas
 
-function migrate_especifica {
-	migration --all --run "$@"
-}
-
-function migrate_create {
+function migration_create {
 	if [[ "$1" != "" ]] ; then
 		local hora=$(date +"%Y%m%d%H%M")
 		echo migration "$hora"_"$1".sql criada
@@ -287,8 +275,9 @@ function migrate_create {
 		fi
 	fi
 }
+alias migratec=migration_create
 
-function backup {
+function mysql_backup {
 	local host="$local_host"
 	local user="$local_user"
 	local pass="$local_pass"
@@ -383,13 +372,15 @@ function backup {
 		fi
 	fi
 }
+alias bkp=mysql_backup
 
-function backup_local {
+function mysql_backup_local {
 	echo "Fazendo dump local"
 	bkp $@
 }
+alias bkpl=mysql_backup_local
 
-function backup_remote {
+function mysql_backup_remote {
 	if [[ $baixa_por_ssh == true ]]; then
 		echo "Fazendo dump de produção por ssh"
 	else 
@@ -398,8 +389,9 @@ function backup_remote {
 
 	bkp -r $@
 }
+alias bkpr=mysql_backup_remote
 
-function upload {
+function mysql_upload {
 	local host="$local_host"
 	local user="$local_user"
 	local pass="$local_pass"
@@ -462,13 +454,15 @@ function upload {
 		[[ $banco == sispag* && $remote == true ]] && echo "Alterando ema_url_ws para remote" && m "$banco" "update ema_empresa set ema_url_ws = replace(replace(ema_url_ws, 'localhost/', ''), '/sispagintegracao/', '.sindicalizi.com.br/sispagintegracao/') where ema_url_ws like 'http://localhost/%' and ema_url_ws not like 'http://localhost/sispagintegracao/';"
 	fi
 }
+alias upl=mysql_upload
 
-function upload_local {
+function mysql_upload_local {
 	echo "Fazendo restore local"
 	upl $@
 }
+alias upll=mysql_upload_local
 
-function upl_remote {
+function mysql_upload_remote {
 	
 	read -r -p "Tem certeza que deseja subir dados para o servidor? [S/N] " response
 	case $response in
@@ -480,6 +474,7 @@ function upl_remote {
 			;;
 	esac
 }
+alias uplr=mysql_upload_remote
 
 function dump {
 	bkpr $@ 
@@ -517,14 +512,19 @@ function help {
 }
 
 function atalhos {
-	echo "    migrate: migrate_local"
-	echo "    migrates: migrate_remote"
-	echo "    migrateo: migrate_especifica"
-	echo "    migratec: migrate_create"
-	echo "    bkpl: backup_local"
-	echo "    bkpr: backup_remote"
-	echo "    upll: upload_local"
-	echo "    uplr: upl_remote"
-	echo "    gts: git status"
-	echo "    e: exit"
+	# aaAtalhos=$(grep "alias\ .*=[^$].*_" ~/.bashrc | sed 's/alias //')
+	# aAtalho="${aaAtalhos	[0]}"
+	x=0
+	atalhos=()
+	grep "alias\ .*=[^$].*_" ~/.bashrc | sed 's/alias //' | while read -r line ; do
+		line=(${line//=/ })
+		atalhos+=("${line[1]}:${line[0]}")
+		# for i in "${atalhos[@]}"
+		# do :
+		# 	if [[ $i == "$line[1]"* ]]; then
+		# 		echo "$i""${line[1]}"
+		# 	fi
+		# done
+	done
+	# echo "${atalhos[0,0]} ${atalhos[0,1]}" # will print 0 1
 }

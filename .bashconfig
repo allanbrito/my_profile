@@ -1,0 +1,8 @@
+atualiza_bashrc=true
+baixa_por_ssh=false
+local_host=192.168.25.200
+local_user=root
+local_pass=
+remote_host=sindicalizi.com.br
+remote_user=sindical
+remote_pass=
