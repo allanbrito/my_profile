@@ -146,11 +146,17 @@ fi
 
 function sublime_commit {
 	local path="${PWD##/}"
-	tar -zcvf "$path_profile"/Sublime_"$whoami".tar -C ~/AppData/Roaming/Sublime\ Text\ 3/Packages/ .
-	git -C "$path_profile" add .
-	git -C "$path_profile" commit -am "Sublime preferences"
-	git -C "$path_profile" pull origin master
-	git -C "$path_profile" push
+	tar -zcvf "$path_profile"/Sublime_"$whoami".tar.gz -C ~/AppData/Roaming/Sublime\ Text\ 3/ Packages Installed\ Packages
+	read -r -p "Deseja commitar? [S/n] " response
+	case $response in
+		[sS][iI][mM]|[sS])
+			git -C "$path_profile" add .
+			git -C "$path_profile" commit -am "Sublime preferences"
+			git -C "$path_profile" pull origin master
+			git -C "$path_profile" push
+		;;
+	esac
+
 }
 
 function sublime_update {
@@ -158,10 +164,10 @@ function sublime_update {
 	if [[ "$user" == "" ]] ; then
 		user="$whoami"
 	fi
-	if [[ ! -f "$path_profile"/Sublime_"$user".tar ]]; then
+	if [[ ! -f "$path_profile"/Sublime_"$user".tar.gz ]]; then
 		echo "O sublime de $user não está disponível"
 	else
-		tar -zxvf  "$path_profile"/Sublime_"$user".tar -C ~/AppData/Roaming/Sublime\ Text\ 3/Packages/
+		tar -zxvf  "$path_profile"/Sublime_"$user".tar.gz -C ~/AppData/Roaming/Sublime\ Text\ 3/
 		clear
 		echo "Sublime atualizado para o de ${user}!"
 	fi
