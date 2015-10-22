@@ -116,6 +116,8 @@ function self_reset {
 		"C:\Program Files (x86)\Git\bin\sh.exe" --login -i
 	fi
 }
+alias reset=self_reset
+
 function self_update {
 	git -C "$path_profile" fetch
 	if [[ $(git -C "$path_profile" rev-parse HEAD) != $(git -C "$path_profile" rev-parse origin/master) ]]; then
