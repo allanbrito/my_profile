@@ -21,6 +21,8 @@ remote_host=sindicalizi.com.br
 remote_user=sindical
 remote_pass="
 
+# PS1="\n\[\e[1;30m\][$$:$PPID - \j:\!\[\e[1;30m\]]\[\e[0;36m\] \T \[\e[1;30m\][\[\e[1;34m\]\u@\H\[\e[1;30m\]:\[\e[0;37m\]${SSH_TTY:-o} \[\e[0;32m\]+${SHLVL}\[\e[1;30m\]] \[\e[1;37m\]\w\[\e[0;37m\] \n\$ "
+
 #atalhos
 alias ls='ls -F --show-control-chars'
 alias gts='git status '
@@ -150,9 +152,17 @@ function sublime_commit {
 }
 
 function sublime_update {
-	tar -zxvf  "$path_profile"/Sublime_"$whoami".tar -C ~/AppData/Roaming/Sublime\ Text\ 3/Packages/
-	clear
-	echo "Sublime atualizado!"
+	local user="$1"
+	if [[ "$user" == "" ]] ; then
+		user="$whoami"
+	fi
+	if [[ ! -f "$path_profile"/Sublime_"$user".tar ]]; then
+		echo "O sublime de $user não está disponível"
+	else
+		tar -zxvf  "$path_profile"/Sublime_"$user".tar -C ~/AppData/Roaming/Sublime\ Text\ 3/Packages/
+		clear
+		echo "Sublime atualizado para o de ${user}!"
+	fi
 }
 
 
