@@ -41,7 +41,7 @@ function config_reset {
 function config {
 	vim "$path_config"
 }
-# clear
+clear
 set -o noglob
 
 #iniciar arquivo de configuração
@@ -75,7 +75,7 @@ alias moobidb=$path_root/sindicalizi/moobilib/scripts/moobidb.php
 #auto_update
 function bash_commit {
 	# read -r -p "Deseja atualizar as funções? [S/n] " response
-	# clear
+	clear
 	read -r -p "Existem alterações, deseja [V]er ou [C]ommitar? [C/v/*] " response
 	case $response in
 		[cC])
@@ -144,7 +144,7 @@ function bash_update {
 				git pull origin master
 				cp .bashrc ../.bashrc
 				bash_reset
-				
+				git -C ~/my_bash/ log  @{1}.. --reverse --no-merges
 			;;
 		esac
 	fi	
@@ -157,7 +157,7 @@ if [[ "$atualiza_bashrc" == true ]] ; then
 	else 
 		bash_update
 	fi
-	# clear
+	clear
 fi
 
 function sublime_commit {
@@ -184,7 +184,7 @@ function sublime_update {
 		echo "O sublime de $user não está disponível"
 	else
 		tar -zxvf  "$path_profile"/Sublime_"$user".tar.gz -C ~/AppData/Roaming/Sublime\ Text\ 3/
-		# clear
+		clear
 		echo "Sublime atualizado para o de ${user}!"
 	fi
 }
