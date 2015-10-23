@@ -12,6 +12,7 @@ path_root=/var/www
 whoami=$(id -u -n)
 path_config=.bashconfig
 path_profile=~/my_bash
+wiki_url="http://fabrica.moobitech.com.br/w/scripts_no_bash/"
 default_params="atualiza_bashrc=true
 baixa_por_ssh=false
 local_host=192.168.25.200
@@ -20,6 +21,7 @@ local_pass=
 remote_host=sindicalizi.com.br
 remote_user=sindical
 remote_pass="
+use_database=
 
 # PS1="\n\[\e[1;30m\][$$:$PPID - \j:\!\[\e[1;30m\]]\[\e[0;36m\] \T \[\e[1;30m\][\[\e[1;34m\]\u@\H\[\e[1;30m\]:\[\e[0;37m\]${SSH_TTY:-o} \[\e[0;32m\]+${SHLVL}\[\e[1;30m\]] \[\e[1;37m\]\w\[\e[0;37m\] \n\$ "
 
@@ -89,6 +91,22 @@ function bash_commit {
 			bash_commit
 		;;
 	esac 
+}
+
+function use {
+	use_database="$1"
+}
+
+function wiki {
+	if [[ "$windows" == true ]] ; then
+		start "$wiki_url"
+	else 
+		if [[ "$mac" == true ]] ; then
+			open "$wiki_url"
+		else
+			xdg-open "$wiki_url"
+		fi
+	fi
 }
 
 function bash_init {
@@ -168,7 +186,8 @@ function mysql_local {
 	local host="$local_host"
 	local user="$local_user"
 	local pass="$local_pass"
-	
+	local banco
+
 	if [[ "$1" == "-r" ]] ; then
 		host="$remote_host"
 		user="$remote_user"
@@ -180,8 +199,12 @@ function mysql_local {
 	if [[ "$2" == "" ]] ; then
 		mysql $connection sindical_$1 || mysql $connection
 	else
-		banco="$1"
-		shift
+		if [[ "$use_database" == "" ]] ; then
+			banco="$1"
+			shift
+		else 
+			banco="$use_database"
+		fi
 		local sql=$@
 		if [[ -f $@ ]]; then
 			sql="source ${sql/~/\~}"
