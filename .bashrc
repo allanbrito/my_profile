@@ -10,7 +10,7 @@ linux=false
 mac=false
 path_root=/var/www
 whoami=$(id -u -n)
-path_config=.bashconfig
+path_config=~/.bashconfig
 path_profile=~/my_bash
 wiki_url="http://fabrica.moobitech.com.br/w/scripts_no_bash/"
 default_params="atualiza_bashrc=true
