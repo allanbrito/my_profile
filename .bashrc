@@ -34,12 +34,19 @@ alias mysqldump=mysqldump
 alias php=php
 
 #exec
-clear
+function config_reset {
+	(touch "$path_config" && echo "$default_params" > "$path_config" && config)
+}
+
+function config {
+	vim "$path_config"
+}
+# clear
 set -o noglob
 
 #iniciar arquivo de configuração
 mkdir -p "$path_profile"
-( [ -e "$path_config" ] || (touch "$path_config" && echo "$default_params" > "$path_config"))
+( [ -f "$path_config" ] || config_reset)
 eval "$default_params"
 while read linha 
 do
@@ -68,7 +75,7 @@ alias moobidb=$path_root/sindicalizi/moobilib/scripts/moobidb.php
 #auto_update
 function bash_commit {
 	# read -r -p "Deseja atualizar as funções? [S/n] " response
-	clear
+	# clear
 	read -r -p "Existem alterações, deseja [V]er ou [C]ommitar? [C/v/*] " response
 	case $response in
 		[cC])
@@ -108,6 +115,7 @@ function wiki {
 		fi
 	fi
 }
+
 
 function bash_init {
 	if [ ! -d "$path_profile"/.git ]; then
@@ -149,7 +157,7 @@ if [[ "$atualiza_bashrc" == true ]] ; then
 	else 
 		bash_update
 	fi
-	clear
+	# clear
 fi
 
 function sublime_commit {
@@ -176,7 +184,7 @@ function sublime_update {
 		echo "O sublime de $user não está disponível"
 	else
 		tar -zxvf  "$path_profile"/Sublime_"$user".tar.gz -C ~/AppData/Roaming/Sublime\ Text\ 3/
-		clear
+		# clear
 		echo "Sublime atualizado para o de ${user}!"
 	fi
 }
