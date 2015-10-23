@@ -195,6 +195,7 @@ function mysql_local {
 	local user="$local_user"
 	local pass="$local_pass"
 	local banco
+	local mysql_commands=("select" "update" "delete" "alter" "show" "desc" "create" "drop" "describe" "flush")
 
 	if [[ "$1" == "-r" ]] ; then
 		host="$remote_host"
@@ -205,13 +206,18 @@ function mysql_local {
 
 	connection="-u $user -h $host -p$pass"
 	if [[ "$2" == "" ]] ; then
-		mysql $connection sindical_$1 || mysql $connection
+		mysql $connection sindical_${use_database:-$1} || mysql $connection
 	else
 		if [[ "$use_database" == "" ]] ; then
 			banco="$1"
 			shift
 		else 
-			banco="$use_database"
+			if [[ $(echo "${mysql_commands[@]}" | grep "$1" | wc -w) -eq 0 ]]; then
+				banco="$1"
+				shift
+			else
+				banco="$use_database"
+			fi
 		fi
 		local sql=$@
 		if [[ -f $@ ]]; then
