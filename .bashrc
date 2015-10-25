@@ -226,13 +226,12 @@ function mysql_local {
 		mysql $connection sindical_$banco -e "$sql" || mysql $connection
 	fi
 }
-alias mysql=mysql_local
 alias m=mysql_local
 
-function mysql_sindicalizi {
-	mysql -r "$@"
+function mysql_remote {
+	mysql_local -r "$@"
 }
-alias s=mysql_sindicalizi
+alias s=mysql_remote
 
 function path_root {
 	cd $path_root/"$1"
@@ -323,6 +322,9 @@ function mysql_backup {
 	local tabelas=
 	local exit=false
 	local remote=false
+	local bIgnoraTabelas=true
+	local aTabelasIgnoradas=(log_log uso_usuario usi_usuario_grupo_usuario pro_perfil_usuario usuario_acao sms_sms eml_email)
+	local sTabelasIgnoradasComando=''
 	
 	mkdir -p ~/backups
 
@@ -351,6 +353,9 @@ function mysql_backup {
 				shift
 				tabelas=$1
 			;;
+			-f | --full)
+				bIgnoraTabelas=false
+				;;
 			-r | --remote )
 				remote=true
 				ssh="sindicalizi"
@@ -397,15 +402,24 @@ function mysql_backup {
 		mkdir -p ~/backups/"$banco"
 		path="$path".sql
 		fullpath=~/backups/"$banco"/"$path"
+		if [[ $bIgnoraTabelas == true ]] ; then
+			for tabela in "${aTabelasIgnoradas[@]}"
+			do :
+			   sTabelasIgnoradasComando+=" --ignore-table=sindical_$banco.${tabela}"
+			done
+		fi
+
 		if [[ $baixa_por_ssh == true && $remote == true && $ssh != "" ]] ; then
-			ssh.exe "$ssh" "mysqldump -u $user -p$pass sindical_$banco $tabelas --ignore-table=sindical_$banco.log_log > /tmp/$banco.sql && gzip -f /tmp/$banco.sql"
+			ssh.exe "$ssh" "mysqldump -u $user -p$pass sindical_$banco $tabelas $sTabelasIgnoradasComando > /tmp/$banco.sql && gzip -f /tmp/$banco.sql"
 			scp sindicalizi:/tmp/"$banco".sql.gz ~/backups/temp.gz 
 			gunzip -c ~/backups/temp.gz > "$fullpath"
 			rm ~/backups/temp.gz 
 			sed -i 's/DEFAULT CURRENT_TIMESTAMP//g' "$fullpath"
+			sed -i 's/.+DEFINER=.+\n//g' "$fullpath"
 		else
-			mysqldump -u "$user" -p"$pass" -h "$host" sindical_"$banco" $tabelas --ignore-table=sindical_"$banco".log_log > "$fullpath" 
+			mysqldump -u "$user" -p"$pass" -h "$host" sindical_"$banco" $tabelas $sTabelasIgnoradasComando > "$fullpath" 
 			sed -i 's/DEFAULT CURRENT_TIMESTAMP//g' "$fullpath"
+			sed -i 's/.+DEFINER=.+\n//g' "$fullpath"
 		fi
 	fi
 }
