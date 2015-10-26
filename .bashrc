@@ -89,6 +89,7 @@ function bash_commit {
 			git commit -am "$msg"
 			git pull origin master && 
 			git push origin master
+			bash_update_version
 			cd "/$path"
 		;;
 		[vV])
@@ -99,6 +100,10 @@ function bash_commit {
 			bash_commit
 		;;
 	esac 
+}
+
+function bash_update_version {
+	( [ -f ~/.version ] || touch ~/.version) && echo $(date -d "yesterday" '+%Y-%m-%dT%H%M') > ~/.version
 }
 
 function use {
@@ -124,6 +129,7 @@ function bash_init {
 		git -C "$path_profile" remote add origin https://github.com/allanbrito/my_profile.git 
 		git -C "$path_profile" fetch --all
 		git -C "$path_profile" pull origin master
+		bash_update_version
 		cp "$path_profile"/.bashrc "$path_profile"/../.bashrc
 	fi
 }
@@ -145,7 +151,7 @@ function bash_update {
 				cd "$path_profile"
 				git pull origin master
 				cp .bashrc ../.bashrc
-				( [ -f ~/.version ] || touch ~/.version) && echo $(date -d "yesterday" '+%Y-%m-%d') > ~/.version
+				bash_update_version
 				bash_reset
 			;;
 		esac
@@ -154,6 +160,8 @@ function bash_update {
 
 function bash_changelog {
 	lines="$1"
+	echo
+	echo "Últimas mudanças:"
 	git -C "$path_profile" log ${lines:--10} --graph --pretty=format:'%C(yellow)%h%Creset - %s%C(green ul) (%cr) <%an>%Creset' --abbrev-commit | cat
 	# git -C "$path_profile" log -10 --pretty=format:"%C(white bold) %s %C(reset)%C(bold)%C(yellow ul)%an, %ar%C(reset)" | cat
 }
