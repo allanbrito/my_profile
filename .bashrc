@@ -87,9 +87,9 @@ function bash_commit {
 			cp ../.bashrc .bashrc
 			git add .
 			git commit -am "$msg"
+			bash_update_version
 			git pull origin master && 
 			git push origin master
-			bash_update_version
 			cd "/$path"
 		;;
 		[vV])
@@ -103,7 +103,7 @@ function bash_commit {
 }
 
 function bash_update_version {
-	( [ -f ~/.version ] || touch ~/.version) && echo $(date -d '-1 min' '+%Y-%m-%dT%H%M') > ~/.version
+	( [ -f ~/.version ] || touch ~/.version) && echo $(date -d '-1 min' '+%Y-%m-%dT%H:%M') > ~/.version
 }
 
 function use {
@@ -158,12 +158,13 @@ function bash_update {
 }
 
 function bash_changelog {
-	local lines="$1"
+	local lines="$@"
+	local message=$(git -C "$path_profile" log ${lines:--10} | cat)
+	[[ ${#message} != 0 ]] && echo "Últimas mudanças:" && git -C "$path_profile" log "${lines:--10}" --pretty=format:"%C(white bold) %s %C(reset)%C(bold)%C(yellow ul)<%an, %ar>%C(reset)" | cat
+	echo -C "$path_profile" log "${lines:--10}" --pretty=format:"%C(white bold) %s %C(reset)%C(bold)%C(yellow ul)<%an, %ar>%C(reset)"
 	if [[ $lines != "" ]]; then
 		bash_update_version
 	fi
-	local message=$(git -C "$path_profile" log ${lines:--10} | cat)
-	[[ ${#message} != 0 ]] && echo "Últimas mudanças:" && git -C "$path_profile" log "${lines:--10}" --pretty=format:"%C(white bold) %s %C(reset)%C(bold)%C(yellow ul)<%an, %ar>%C(reset)" | cat
 
 }
 
