@@ -103,7 +103,7 @@ function bash_commit {
 }
 
 function bash_update_version {
-	( [ -f ~/.version ] || touch ~/.version) && echo $(date '+%Y-%m-%dT%H%M') > ~/.version
+	( [ -f ~/.version ] || touch ~/.version) && echo $(date -d '-1 min' '+%Y-%m-%dT%H%M') > ~/.version
 }
 
 function use {
@@ -151,7 +151,6 @@ function bash_update {
 				cd "$path_profile"
 				git pull origin master
 				cp .bashrc ../.bashrc
-				bash_update_version
 				bash_reset
 			;;
 		esac
@@ -159,11 +158,13 @@ function bash_update {
 }
 
 function bash_changelog {
-	lines="$1"
-	echo
-	echo "Últimas mudanças:"
-	git -C "$path_profile" log ${lines:--10} --graph --pretty=format:'%C(yellow)%h%Creset - %s%C(green ul) (%cr) <%an>%Creset' --abbrev-commit | cat
-	# git -C "$path_profile" log -10 --pretty=format:"%C(white bold) %s %C(reset)%C(bold)%C(yellow ul)%an, %ar%C(reset)" | cat
+	local lines="$1"
+	if [[ $lines != "" ]]; then
+		bash_update_version
+	fi
+	local message=$(git -C "$path_profile" log ${lines:--10} | cat)
+	[[ ${#message} != 0 ]] && echo "Últimas mudanças:" && git -C "$path_profile" log "${lines:--10}" --pretty=format:"%C(white bold) %s %C(reset)%C(bold)%C(yellow ul)<%an, %ar>%C(reset)" | cat
+
 }
 
 if [[ "$atualiza_bashrc" == true ]] ; then
