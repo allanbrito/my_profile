@@ -162,7 +162,7 @@ fi
 
 if [[ "$mostrar_mensagem_ultimo_commit" == true ]] ; then
 	# echo $(git -C ~/my_bash/ log  @{1}.. --reverse --no-merges)
-	echo $(git log -1 --oneline)
+	echo $(git -C ~/my_bash/ log -1 --pretty="%an %ar: %B")
 fi
 
 function sublime_commit {
