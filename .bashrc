@@ -129,6 +129,7 @@ function bash_init {
 }
 
 function bash_reset {
+		clear
 	if [[ "$windows" == true ]] ; then
 		"C:\Program Files (x86)\Git\bin\sh.exe" --login -i
 	fi
@@ -144,10 +145,17 @@ function bash_update {
 				cd "$path_profile"
 				git pull origin master
 				cp .bashrc ../.bashrc
+				( [ -f ~/.version ] || touch ~/.version) && echo $(date -d "yesterday" '+%Y-%m-%d') > ~/.version
 				bash_reset
 			;;
 		esac
 	fi	
+}
+
+function bash_changelog {
+	lines="$1"
+	git -C "$path_profile" log ${lines:--10} --graph --pretty=format:'%C(yellow)%h%Creset - %s%C(green ul) (%cr) <%an>%Creset' --abbrev-commit | cat
+	# git -C "$path_profile" log -10 --pretty=format:"%C(white bold) %s %C(reset)%C(bold)%C(yellow ul)%an, %ar%C(reset)" | cat
 }
 
 if [[ "$atualiza_bashrc" == true ]] ; then
@@ -162,7 +170,8 @@ fi
 
 if [[ "$mostrar_mensagem_ultimo_commit" == true ]] ; then
 	# echo $(git -C ~/my_bash/ log  @{1}.. --reverse --no-merges)
-	echo $(git -C ~/my_bash/ log -1 --pretty="%an %ar: %B")
+	# echo $(git -C "$path_profile" log -1 --pretty=format:"%C(bold)%s %C(bold)%C(Yellow ul)%an, %ar")
+	bash_changelog $(echo "--after='"$(cat ~/.version)"'" || echo "-1")
 fi
 
 function sublime_commit {
