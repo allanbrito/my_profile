@@ -103,7 +103,7 @@ function bash_commit {
 }
 
 function bash_update_version {
-	( [ -f ~/.version ] || touch ~/.version) && echo $(date -d "yesterday" '+%Y-%m-%dT%H%M') > ~/.version
+	( [ -f ~/.version ] || touch ~/.version) && echo $(date '+%Y-%m-%dT%H%M') > ~/.version
 }
 
 function use {
