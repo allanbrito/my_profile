@@ -14,6 +14,7 @@ path_config=~/.bashconfig
 path_profile=~/my_bash
 wiki_url="http://fabrica.moobitech.com.br/w/scripts_no_bash/"
 default_params="atualiza_bashrc=true
+mostrar_mensagem_ultimo_commit=true
 baixa_por_ssh=false
 local_host=192.168.25.200
 local_user=root
@@ -144,7 +145,6 @@ function bash_update {
 				git pull origin master
 				cp .bashrc ../.bashrc
 				bash_reset
-				git -C ~/my_bash/ log  @{1}.. --reverse --no-merges
 			;;
 		esac
 	fi	
@@ -158,6 +158,11 @@ if [[ "$atualiza_bashrc" == true ]] ; then
 		bash_update
 	fi
 	clear
+fi
+
+if [[ "$mostrar_mensagem_ultimo_commit" == true ]] ; then
+	# echo $(git -C ~/my_bash/ log  @{1}.. --reverse --no-merges)
+	echo $(git log -1 --oneline)
 fi
 
 function sublime_commit {
@@ -502,7 +507,7 @@ function mysql_upload {
 		fi
 		mysql -u "$user" -h "$host" -p"$pass" sindical_"$banco" < "$path"
 		[[ $banco == sispag* && $remote == false ]] && echo "Alterando ema_url_ws para local" && m "$banco" "update ema_empresa set ema_url_ws = replace(replace(ema_url_ws, '.sindicalizi.com.br',''), 'http://', 'http://localhost/')  where ema_url_ws like '%.sindicalizi.com.br/sispagintegracao/';"
-		[[ $banco == sispag* && $remote == true ]] && echo "Alterando ema_url_ws para remote" && m "$banco" "update ema_empresa set ema_url_ws = replace(replace(ema_url_ws, 'localhost/', ''), '/sispagintegracao/', '.sindicalizi.com.br/sispagintegracao/') where ema_url_ws like 'http://localhost/%' and ema_url_ws not like 'http://localhost/sispagintegracao/';"
+		[[ $banco == sispag* && $remote == true ]] && echo "Alterando ema_url_ws para remote" && s "$banco" "update ema_empresa set ema_url_ws = replace(replace(ema_url_ws, 'localhost/', ''), '/sispagintegracao/', '.sindicalizi.com.br/sispagintegracao/') where ema_url_ws like 'http://localhost/%' and ema_url_ws not like 'http://localhost/sispagintegracao/';"
 	fi
 }
 alias upl=mysql_upload
