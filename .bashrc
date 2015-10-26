@@ -161,7 +161,6 @@ function bash_changelog {
 	local lines="$@"
 	local message=$(git -C "$path_profile" log ${lines:--10} | cat)
 	[[ ${#message} != 0 ]] && echo "Últimas mudanças:" && git -C "$path_profile" log "${lines:--10}" --pretty=format:"%C(white bold) %s %C(reset)%C(bold)%C(yellow ul)<%an, %ar>%C(reset)" | cat
-	echo -C "$path_profile" log "${lines:--10}" --pretty=format:"%C(white bold) %s %C(reset)%C(bold)%C(yellow ul)<%an, %ar>%C(reset)"
 	if [[ $lines != "" ]]; then
 		bash_update_version
 	fi
