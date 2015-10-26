@@ -506,10 +506,21 @@ function mysql_upload {
 			pass="$remote_pass"
 		fi
 		mysql -u "$user" -h "$host" -p"$pass" sindical_"$banco" < "$path"
-		[[ $banco == sispag* && $remote == false ]] && echo "Alterando ema_url_ws para local" && m "$banco" "update ema_empresa set ema_url_ws = replace(replace(ema_url_ws, '.sindicalizi.com.br',''), 'http://', 'http://localhost/')  where ema_url_ws like '%.sindicalizi.com.br/sispagintegracao/';"
-		[[ $banco == sispag* && $remote == true ]] && echo "Alterando ema_url_ws para remote" && s "$banco" "update ema_empresa set ema_url_ws = replace(replace(ema_url_ws, 'localhost/', ''), '/sispagintegracao/', '.sindicalizi.com.br/sispagintegracao/') where ema_url_ws like 'http://localhost/%' and ema_url_ws not like 'http://localhost/sispagintegracao/';"
+		[[ $banco == sispag* && $remote == false ]] && mysql_update_urlws_local $banco
+		[[ $banco == sispag* && $remote == true ]] && mysql_update_urlws_remote $banco
 	fi
 }
+
+function mysql_update_urlws_local {
+	local banco=${1:-sispag}
+	echo "Alterando ema_url_ws de $banco para local" && m "$banco" "update ema_empresa set ema_url_ws = replace(replace(ema_url_ws, '.sindicalizi.com.br',''), 'http://', 'http://localhost/')  where ema_url_ws like '%.sindicalizi.com.br/sispagintegracao/';"
+}
+
+function mysql_update_urlws_remote {
+	local banco=${1:-sispag}
+	echo "Alterando ema_url_ws de $banco para remote" && s "$banco" "update ema_empresa set ema_url_ws = replace(replace(ema_url_ws, 'localhost/', ''), '/sispagintegracao/', '.sindicalizi.com.br/sispagintegracao/') where ema_url_ws like 'http://localhost/%' and ema_url_ws not like 'http://localhost/sispagintegracao/';"
+}
+
 alias upl=mysql_upload
 
 function mysql_upload_local {
