@@ -217,7 +217,7 @@ function mysql_local {
 	local host="$local_host"
 	local user="$local_user"
 	local pass="$local_pass"
-	local banco
+	local banco=
 	local mysql_commands=("select" "update" "delete" "alter" "show" "desc" "create" "drop" "describe" "flush")
 
 	if [[ "$1" == "-r" ]] ; then
@@ -227,9 +227,15 @@ function mysql_local {
 		shift
 	fi
 
-	connection="-u $user -h $host -p$pass"
+	# connection="-u $user -h $host -p$pass"
+	connection="$pass mysql -u $user -h $host"
 	if [[ "$2" == "" ]] ; then
-		mysql $connection sindical_${use_database:-$1} || mysql $connection
+		if [[ ${use_database:-$1} != "" ]]; then
+			eval MYSQL_PWD=$connection sindical_${use_database:-$1} 
+		else
+			eval MYSQL_PWD=$connection
+		fi
+		# mysql $connection sindical_${use_database:-$1} || mysql $connection
 	else
 		if [[ "$use_database" == "" ]] ; then
 			banco="$1"
@@ -246,7 +252,12 @@ function mysql_local {
 		if [[ -f $@ ]]; then
 			sql="source ${sql/~/\~}"
 		fi
-		mysql $connection sindical_$banco -e "$sql" || mysql $connection
+		if [[ "$sql" != "" ]]; then
+			eval MYSQL_PWD=$connection sindical_$banco -e \'"$sql"\'
+		else
+			eval MYSQL_PWD=$connection
+		fi
+		# mysql $connection sindical_$banco -e "$sql" || mysql $connection
 	fi
 }
 alias m=mysql_local
@@ -347,7 +358,7 @@ function mysql_backup {
 	local remote=false
 	local bIgnoraTabelas=true
 	local aTabelasIgnoradas=(log_log uso_usuario usi_usuario_grupo_usuario pro_perfil_usuario usuario_acao sms_sms eml_email)
-	local sTabelasIgnoradasComando=''
+	local extracommands=''
 	
 	mkdir -p ~/backups
 
@@ -371,6 +382,9 @@ function mysql_backup {
 			-b | --banco )
 				shift
 				banco=$1
+			;;
+			-d | --no-data )
+				extracommands+=" -d"
 			;;
 			-t | --tabelas )
 				shift
@@ -428,19 +442,19 @@ function mysql_backup {
 		if [[ $bIgnoraTabelas == true ]] ; then
 			for tabela in "${aTabelasIgnoradas[@]}"
 			do :
-			   sTabelasIgnoradasComando+=" --ignore-table=sindical_$banco.${tabela}"
+			   extracommands+=" --ignore-table=sindical_$banco.${tabela}"
 			done
 		fi
 
 		if [[ $baixa_por_ssh == true && $remote == true && $ssh != "" ]] ; then
-			ssh.exe "$ssh" "mysqldump -u $user -p$pass sindical_$banco $tabelas $sTabelasIgnoradasComando > /tmp/$banco.sql && gzip -f /tmp/$banco.sql"
+			ssh.exe "$ssh" "mysqldump -u $user -p$pass sindical_$banco $tabelas $extracommands > /tmp/$banco.sql && gzip -f /tmp/$banco.sql"
 			scp sindicalizi:/tmp/"$banco".sql.gz ~/backups/temp.gz 
 			gunzip -c ~/backups/temp.gz > "$fullpath"
 			rm ~/backups/temp.gz 
 			sed -i 's/DEFAULT CURRENT_TIMESTAMP//g' "$fullpath"
 			sed -i 's/.+DEFINER=.+\n//g' "$fullpath"
 		else
-			mysqldump -u "$user" -p"$pass" -h "$host" sindical_"$banco" $tabelas $sTabelasIgnoradasComando > "$fullpath" 
+			mysqldump -u "$user" -p"$pass" -h "$host" sindical_"$banco" $tabelas $extracommands > "$fullpath" 
 			sed -i 's/DEFAULT CURRENT_TIMESTAMP//g' "$fullpath"
 			sed -i 's/.+DEFINER=.+\n//g' "$fullpath"
 		fi
@@ -473,7 +487,7 @@ function mysql_upload {
 	local path=
 	local exit=false
 	local remote=false
-	
+
 	while [ "$1" != "" ]; do
 		case $1 in
 			-h | --host )
@@ -566,10 +580,26 @@ function dump {
 	upll $@ -path "$fullpath"
 }
 
+function dump_migracao {
+	m "$1" create database if not exists sindical_"$1"_migracao
+	bkpr $@ -d -f
+	upll $@ -b "$1"_migracao -path "$fullpath"
+	bkpr $@ -f
+	upll $@ -b "$1"_migracao -path "$fullpath"
+}
+alias dumpm=dump_migracao
+
 function restore {
-	bkpl $@ 
+	bkpl $@ -b "$1"_migracao
 	uplr $@ -path "$fullpath"
 }
+
+function restore_migracao {
+	bkpl $@ -b "$1"_migracao
+	uplr $@ -path "$fullpath"
+}
+alias restorem=restore_migracao
+
 
 #doc
 function help {
