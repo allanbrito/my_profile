@@ -1,1 +1,2 @@
-upl_remote: faz restore remote passando banco e arquivo. Pergunta se tem certeza
+\e[1m mysql_upload_remote (uplr):\e[0;2m Faz restore de um arquivo para o banco de dados remote. Pergunta se tem certeza.
+\n\tExemplo de uso: uplr demo ~/Desktop/arquivo.sql ou uplr demo "~/Desktop/arquivo.sql"\e[0;

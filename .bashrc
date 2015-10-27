@@ -627,14 +627,13 @@ function help {
 		for i in "${funcoes[@]}"
 		do :
 			if [[ -f "$path_profile"/help/"$i" ]]; then
-				cat "$path_profile"/help/"$i"
-				echo 
+				echo -e $(head -1 "$path_profile"/help/"$i")
 			else
 				falta_documentar="$falta_documentar\n$i: Ainda não documentada"
 			fi
 		done
 
-		echo -e "$falta_documentar"
+		# echo -e "$falta_documentar"
 	fi
 }
 

@@ -1,1 +1,1 @@
-dump: bkp remote e upl local passando apenas o banco
+\e[1m dump:\e[0;2m Faz backup remote e restore local\e[0;
