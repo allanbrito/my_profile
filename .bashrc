@@ -122,8 +122,7 @@ function wiki {
 	fi
 }
 
-
-function bash_init {
+function init_bash {
 	if [ ! -d "$path_profile"/.git ]; then
 		git -C "$path_profile" init 
 		git -C "$path_profile" remote add origin https://github.com/allanbrito/my_profile.git 
@@ -168,7 +167,7 @@ function bash_changelog {
 }
 
 if [[ "$atualiza_bashrc" == true ]] ; then
-	bash_init 
+	init_bash 
 	if [[ $(diff "$path_profile"/.bashrc "$path_profile"/../.bashrc) ]]; then 
 		bash_commit
 	else 
@@ -359,6 +358,7 @@ function mysql_backup {
 	local bIgnoraTabelas=true
 	local aTabelasIgnoradas=(log_log uso_usuario usi_usuario_grupo_usuario pro_perfil_usuario usuario_acao sms_sms eml_email)
 	local extracommands=''
+	now=$(date +"%Y%m%d_%H%M")
 	
 	mkdir -p ~/backups
 
@@ -587,6 +587,18 @@ function dump_migracao {
 	bkpr $@ -f
 	upll $@ -b "$1"_migracao -path "$fullpath"
 }
+
+function init_database_migracao {
+	if [[ "$1" != "" ]]; then
+		banco=${2:-sinpoldf}
+		m "$1" create database if not exists sindical_"$1"_migracao
+		bkpl $@ -d -f -b "$banco"
+		upll $@ -b "$1"_migracao -path "$fullpath"
+		bkpl $@ -f -b "$banco"
+		upll $@ -b "$1"_migracao -path "$fullpath"
+	fi
+}
+
 alias dumpm=dump_migracao
 
 function restore {
@@ -633,7 +645,9 @@ function atalhos {
 	atalhos=()
 	grep "alias\ .*=[^$].*_" ~/.bashrc | sed 's/alias //' | while read -r line ; do
 		line=(${line//=/ })
-		atalhos+=("${line[1]}:${line[0]}")
+		# eval ${line[1]}=${!line[1]}, ${line[0]}
+		# echo ${!line[1]}
+		# atalhos+=("${line[1]}:${line[0]}")
 		# for i in "${atalhos[@]}"
 		# do :
 		# 	if [[ $i == "$line[1]"* ]]; then
