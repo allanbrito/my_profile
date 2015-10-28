@@ -1,1 +1,1 @@
-m: acessa o banco local
+\e[1m mysql_local \e[1m{\e[4;36mm\e[0;1m}\e[0;2m: acessa o banco local\e[0m

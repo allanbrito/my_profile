@@ -1,1 +1,1 @@
-backup_remote: faz bkp do remote passando banco e tabelas (opcional)
+\e[1m mysql_backup_remote {\e[4;36mbkpr\e[0;1m}\e[0;2m: backup remote passando banco e tabelas (opcional)\e[0m

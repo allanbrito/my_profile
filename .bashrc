@@ -29,12 +29,16 @@ use_database=
 #atalhos
 alias ls='ls -F --show-control-chars'
 alias gts='git status '
+alias gitk='gitk &'	
+
 alias e='exit'
 alias mysql=mysql
 alias mysqldump=mysqldump
 alias php=php
+alias h=cd ~
 
 #exec
+
 function config_reset {
 	(touch "$path_config" && echo "$default_params" > "$path_config" && config)
 }
@@ -66,6 +70,8 @@ case "$(uname -s)" in
 		alias mysql=$path_root/../mysql/bin/mysql.exe
 		alias mysqldump=$path_root/../mysql/bin/mysqldump.exe
 		alias php=$path_root/../php/php.exe
+		alias subl="/C/Program\ Files/Sublime\ Text\ 3/subl.exe"
+		alias bash="subl ~/.bashrc"
 	;;
 esac
 
@@ -100,6 +106,9 @@ function bash_commit {
 			bash_commit
 		;;
 	esac 
+}
+function bash_edit {
+	bash
 }
 
 function bash_update_version {
@@ -345,7 +354,6 @@ function migration_create {
 	fi
 }
 alias migratec=migration_create
-
 function mysql_backup {
 	local host="$local_host"
 	local user="$local_user"
@@ -612,12 +620,11 @@ function restore_migracao {
 }
 alias restorem=restore_migracao
 
-
 #doc
 function help {
 	if [[ "$1" != "" ]] ; then
 		if [[ -f "$path_profile"/help/"$1" ]]; then
-			cat "$path_profile"/help/"$1"
+			echo -e $(cat "$path_profile"/help/"$1")
 		else
 			echo "$1: Ainda não documentada"
 		fi

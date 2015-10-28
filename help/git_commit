@@ -1,1 +1,1 @@
-\e[1m git_commit (gtc):\e[0;2m adiciona, commita, dá pull dá push e atualiza dependências\e[0m
+\e[1m git_commit {\e[4;36mgtc\e[0;1m}\e[0;2m: adiciona, commita, dá pull dá push e atualiza dependências\e[0m

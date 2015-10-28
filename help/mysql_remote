@@ -1,1 +1,1 @@
-s: acesso a banco remoto
+\e[1m mysql_remote {\e[4;36ms\e[0;1m}\e[0;2m: acesso ao mysql remoto\e[0m

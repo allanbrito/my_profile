@@ -1,1 +1,1 @@
-\e[1m path_root (x):\e[0;2m vai para a pasta htdocs\e[0;
+\e[1m path_root {\e[4;36mx\e[0;1m}\e[0;2m: vai para a pasta htdocs\e[0m

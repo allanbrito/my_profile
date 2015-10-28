@@ -1,1 +1,1 @@
-upload_local: faz restore local passando banco e arquivo
+\e[1m mysql_upload_local {\e[4;36mupll\e[0;1m}\e[0;2m: restore local passando banco e arquivo\e[0m
