@@ -35,23 +35,90 @@ alias e='exit'
 alias mysql=mysql
 alias mysqldump=mysqldump
 alias php=php
-alias h=cd ~
+alias home=path_home
+alias bash=open_bash
+
+alias moobidb=$path_root/sindicalizi/moobilib/scripts/moobidb.php
+
+alias bash_update_version="( [ -f ~/.bashversion ] || touch ~/.bashversion) && echo $(date -d '-1 min' '+%Y-%m-%dT%H:%M') > ~/.bashversion"
+
+alias commit=bash_commit
+
+alias use=mysql_use
+
+alias wiki=open_wiki
+
+alias init=init_bash
+
+alias reset=bash_reset
+
+alias update=bash_update
+
+alias subl_commit=sublime_commit
+
+alias subl_update=sublime_update
+
+alias changelog=bash_changelog
+
+alias m=mysql_local
+
+alias s=mysql_remote
+
+alias x=path_root
+
+alias gtc="git_commit --"
+
+alias gtu=git_update
+
+alias migration=path_migration
+
+alias migrate=migration_local_todas
+
+alias migrates=migration_remote_todas
+
+alias migratec=migration_create
+
+alias bkp=mysql_backup
+
+alias bkpl=mysql_backup_local
+
+alias bkpr=mysql_backup_remote
+
+alias upl=mysql_upload
+
+alias upll=mysql_upload_local
+
+alias uplr=mysql_upload_remote
+
+alias dump=mysql_dump
+
+alias dumpm=mysql_dump_migracao
+
+alias restore=mysql_restore
+
+alias restorem=mysql_restore_migracao
+alias mmigracao=init_base_migracao
+alias urlsispagl=mysql_update_urlws_local
+alias urlsispagr=mysql_update_urlws_remote
+alias h=help
+alias a=atalhos
+alias r=reset
+alias b=bash
+
 
 #exec
 
-function config_reset {
-	(touch "$path_config" && echo "$default_params" > "$path_config" && config)
-}
 
-function config {
-	vim "$path_config"
-}
+[ -f ~/.bashversion ] || touch ~/.bashversion
+
+
+alias config=open_config
 clear
 set -o noglob
 
 #iniciar arquivo de configuração
 mkdir -p "$path_profile"
-( [ -f "$path_config" ] || config_reset)
+( [ -f "$path_config" ] || init_config)
 eval "$default_params"
 while read linha 
 do
@@ -71,15 +138,25 @@ case "$(uname -s)" in
 		alias mysqldump=$path_root/../mysql/bin/mysqldump.exe
 		alias php=$path_root/../php/php.exe
 		alias subl="/C/Program\ Files/Sublime\ Text\ 3/subl.exe"
-		alias bash="subl ~/.bashrc"
 	;;
 esac
 
-#alias || variables pt2
-migrations=$path_root/sindicalizi/migrations/
-alias moobidb=$path_root/sindicalizi/moobilib/scripts/moobidb.php
 
-#auto_update
+
+#alias|| variables pt2
+migrations=$path_root/sindicalizi/migrations/
+
+
+
+function bash_changelog {
+	local lines="$@"
+	local message=$(git -C "$path_profile" log ${lines:--10} | cat)
+	[[ ${#message} != 0 ]] && echo "Últimas mudanças:" && git -C "$path_profile" log "${lines:--10}" --pretty=format:"%C(white bold) %s %C(reset)%C(bold)%C(yellow ul)<%an, %ar>%C(reset)" | cat
+	if [[ $lines != "" ]]; then
+		bash_update_version
+	fi
+}
+
 function bash_commit {
 	# read -r -p "Deseja atualizar as funções? [S/n] " response
 	clear
@@ -107,40 +184,6 @@ function bash_commit {
 		;;
 	esac 
 }
-function bash_edit {
-	bash
-}
-
-function bash_update_version {
-	( [ -f ~/.version ] || touch ~/.version) && echo $(date -d '-1 min' '+%Y-%m-%dT%H:%M') > ~/.version
-}
-
-function use {
-	use_database="$1"
-}
-
-function wiki {
-	if [[ "$windows" == true ]] ; then
-		start "$wiki_url"
-	else 
-		if [[ "$mac" == true ]] ; then
-			open "$wiki_url"
-		else
-			xdg-open "$wiki_url"
-		fi
-	fi
-}
-
-function init_bash {
-	if [ ! -d "$path_profile"/.git ]; then
-		git -C "$path_profile" init 
-		git -C "$path_profile" remote add origin https://github.com/allanbrito/my_profile.git 
-		git -C "$path_profile" fetch --all
-		git -C "$path_profile" pull origin master
-		bash_update_version
-		cp "$path_profile"/.bashrc "$path_profile"/../.bashrc
-	fi
-}
 
 function bash_reset {
 		clear
@@ -148,7 +191,6 @@ function bash_reset {
 		"C:\Program Files (x86)\Git\bin\sh.exe" --login -i
 	fi
 }
-alias reset=bash_reset
 
 function bash_update {
 	git -C "$path_profile" fetch
@@ -164,121 +206,6 @@ function bash_update {
 		esac
 	fi	
 }
-
-function bash_changelog {
-	local lines="$@"
-	local message=$(git -C "$path_profile" log ${lines:--10} | cat)
-	[[ ${#message} != 0 ]] && echo "Últimas mudanças:" && git -C "$path_profile" log "${lines:--10}" --pretty=format:"%C(white bold) %s %C(reset)%C(bold)%C(yellow ul)<%an, %ar>%C(reset)" | cat
-	if [[ $lines != "" ]]; then
-		bash_update_version
-	fi
-
-}
-
-if [[ "$atualiza_bashrc" == true ]] ; then
-	init_bash 
-	if [[ $(diff "$path_profile"/.bashrc "$path_profile"/../.bashrc) ]]; then 
-		bash_commit
-	else 
-		bash_update
-	fi
-	clear
-fi
-
-if [[ "$mostrar_mensagem_ultimo_commit" == true ]] ; then
-	# echo $(git -C ~/my_bash/ log  @{1}.. --reverse --no-merges)
-	# echo $(git -C "$path_profile" log -1 --pretty=format:"%C(bold)%s %C(bold)%C(Yellow ul)%an, %ar")
-	bash_changelog $(echo "--after='"$(cat ~/.version)"'" || echo "-1")
-fi
-
-function sublime_commit {
-	local path="${PWD##/}"
-	tar -zcvf "$path_profile"/Sublime_"$whoami".tar.gz -C ~/AppData/Roaming/Sublime\ Text\ 3/ Packages Installed\ Packages
-	read -r -p "Deseja commitar? [S/n] " response
-	case $response in
-		[sS][iI][mM]|[sS])
-			git -C "$path_profile" add .
-			git -C "$path_profile" commit -am "Sublime preferences"
-			git -C "$path_profile" pull origin master
-			git -C "$path_profile" push
-		;;
-	esac
-
-}
-
-function sublime_update {
-	local user="$1"
-	if [[ "$user" == "" ]] ; then
-		user="$whoami"
-	fi
-	if [[ ! -f "$path_profile"/Sublime_"$user".tar.gz ]]; then
-		echo "O sublime de $user não está disponível"
-	else
-		tar -zxvf  "$path_profile"/Sublime_"$user".tar.gz -C ~/AppData/Roaming/Sublime\ Text\ 3/
-		clear
-		echo "Sublime atualizado para o de ${user}!"
-	fi
-}
-
-#functions
-function mysql_local {
-	local host="$local_host"
-	local user="$local_user"
-	local pass="$local_pass"
-	local banco=
-	local mysql_commands=("select" "update" "delete" "alter" "show" "desc" "create" "drop" "describe" "flush")
-
-	if [[ "$1" == "-r" ]] ; then
-		host="$remote_host"
-		user="$remote_user"
-		pass="$remote_pass"
-		shift
-	fi
-
-	# connection="-u $user -h $host -p$pass"
-	connection="$pass mysql -u $user -h $host"
-	if [[ "$2" == "" ]] ; then
-		if [[ ${use_database:-$1} != "" ]]; then
-			eval MYSQL_PWD=$connection sindical_${use_database:-$1} 
-		else
-			eval MYSQL_PWD=$connection
-		fi
-		# mysql $connection sindical_${use_database:-$1} || mysql $connection
-	else
-		if [[ "$use_database" == "" ]] ; then
-			banco="$1"
-			shift
-		else 
-			if [[ $(echo "${mysql_commands[@]}" | grep "$1" | wc -w) -eq 0 ]]; then
-				banco="$1"
-				shift
-			else
-				banco="$use_database"
-			fi
-		fi
-		local sql=$@
-		if [[ -f $@ ]]; then
-			sql="source ${sql/~/\~}"
-		fi
-		if [[ "$sql" != "" ]]; then
-			eval MYSQL_PWD=$connection sindical_$banco -e \'"$sql"\'
-		else
-			eval MYSQL_PWD=$connection
-		fi
-		# mysql $connection sindical_$banco -e "$sql" || mysql $connection
-	fi
-}
-alias m=mysql_local
-
-function mysql_remote {
-	mysql_local -r "$@"
-}
-alias s=mysql_remote
-
-function path_root {
-	cd $path_root/"$1"
-}
-alias x=path_root
 
 function git_commit {
 	local update=true
@@ -304,7 +231,6 @@ function git_commit {
 		fi
 	fi
 }
-alias gtc="git_commit --"
 
 function git_update {
 	local path="${PWD##/}"
@@ -321,21 +247,32 @@ function git_update {
 	git pull || true 
 	cd "/$path"
 }
-alias gtu=git_update
 
-function migration {
-	moobidb --no-ansi "$@"
+function init_bash {
+	if [ ! -d "$path_profile"/.git ]; then
+		git -C "$path_profile" init 
+		git -C "$path_profile" remote add origin https://github.com/allanbrito/my_profile.git 
+		git -C "$path_profile" fetch --all
+		git -C "$path_profile" pull origin master
+		bash_update_version
+		cp "$path_profile"/.bashrc "$path_profile"/../.bashrc
+	fi
 }
 
-function migration_local_todas {
-	migration --migrate --all "$@"
+function init_config {
+	(touch "$path_config" && echo "$default_params" > "$path_config" && config)
 }
-alias migrate=migration_local_todas
 
-function migration_remote_todas {
-	migration --migrate --prod --all "$@"
+function init_base_migracao {
+	if [[ "$1" != "" ]]; then
+		banco=${2:-sinpoldf}
+		m "$1" create database if not exists sindical_"$1"_migracao
+		bkpl $@ -d -f -b "$banco"
+		upll $@ -b "$1"_migracao -path "$fullpath"
+		bkpl $@ -f -b "$banco"
+		upll $@ -b "$1"_migracao -path "$fullpath"
+	fi
 }
-alias migrates=migration_remote_todas
 
 function migration_create {
 	if [[ "$1" != "" ]] ; then
@@ -353,7 +290,15 @@ function migration_create {
 		fi
 	fi
 }
-alias migratec=migration_create
+
+function migration_local_todas {
+	migration --migrate --all "$@"
+}
+
+function migration_remote_todas {
+	migration --migrate --prod --all "$@"
+}
+
 function mysql_backup {
 	local host="$local_host"
 	local user="$local_user"
@@ -468,13 +413,11 @@ function mysql_backup {
 		fi
 	fi
 }
-alias bkp=mysql_backup
 
 function mysql_backup_local {
 	echo "Fazendo dump local"
 	bkp $@
 }
-alias bkpl=mysql_backup_local
 
 function mysql_backup_remote {
 	if [[ $baixa_por_ssh == true ]]; then
@@ -485,7 +428,81 @@ function mysql_backup_remote {
 
 	bkp -r $@
 }
-alias bkpr=mysql_backup_remote
+
+function mysql_dump {
+	bkpr $@ 
+	upll $@ -path "$fullpath"
+}
+
+function mysql_dump_migracao {
+	m "$1" create database if not exists sindical_"$1"_migracao
+	bkpr $@ -d -f
+	upll $@ -b "$1"_migracao -path "$fullpath"
+	bkpr $@ -f
+	upll $@ -b "$1"_migracao -path "$fullpath"
+}
+
+function mysql_local {
+	local host="$local_host"
+	local user="$local_user"
+	local pass="$local_pass"
+	local banco=
+	local mysql_commands=("select" "update" "delete" "alter" "show" "desc" "create" "drop" "describe" "flush")
+
+	if [[ "$1" == "-r" ]] ; then
+		host="$remote_host"
+		user="$remote_user"
+		pass="$remote_pass"
+		shift
+	fi
+
+	# connection="-u $user -h $host -p$pass"
+	connection="$pass mysql -u $user -h $host"
+	if [[ "$2" == "" ]] ; then
+		if [[ ${use_database:-$1} != "" ]]; then
+			eval MYSQL_PWD=$connection sindical_${use_database:-$1} 
+		else
+			eval MYSQL_PWD=$connection
+		fi
+		# mysql $connection sindical_${use_database:-$1} || mysql $connection
+	else
+		if [[ "$use_database" == "" ]] ; then
+			banco="$1"
+			shift
+		else 
+			if [[ $(echo "${mysql_commands[@]}" | grep "$1" | wc -w) -eq 0 ]]; then
+				banco="$1"
+				shift
+			else
+				banco="$use_database"
+			fi
+		fi
+		local sql=$@
+		if [[ -f $@ ]]; then
+			sql="source ${sql/~/\~}"
+		fi
+		if [[ "$sql" != "" ]]; then
+			eval MYSQL_PWD=$connection sindical_$banco -e \'"$sql"\'
+		else
+			eval MYSQL_PWD=$connection
+		fi
+		# mysql $connection sindical_$banco -e "$sql" || mysql $connection
+	fi
+}
+
+function mysql_remote {
+	mysql_local -r "$@"
+}
+
+function mysql_update_urlws_local {
+	local banco=${1:-sispag}
+	echo "Alterando ema_url_ws de $banco para local" && m "$banco" "update ema_empresa set ema_url_ws = replace(replace(ema_url_ws, '.sindicalizi.com.br',''), 'http://', 'http://localhost/')  where ema_url_ws like '%.sindicalizi.com.br/sispagintegracao/';"
+}
+
+function mysql_update_urlws_remote {
+	local banco=${1:-sispag}
+	echo "Alterando ema_url_ws de $banco para remote" && s "$banco" "update ema_empresa set ema_url_ws = replace(replace(ema_url_ws, 'localhost/', ''), '/sispagintegracao/', '.sindicalizi.com.br/sispagintegracao/') where ema_url_ws like 'http://localhost/%' and ema_url_ws not like 'http://localhost/sispagintegracao/';"
+}
 
 function mysql_upload {
 	local host="$local_host"
@@ -551,23 +568,10 @@ function mysql_upload {
 	fi
 }
 
-function mysql_update_urlws_local {
-	local banco=${1:-sispag}
-	echo "Alterando ema_url_ws de $banco para local" && m "$banco" "update ema_empresa set ema_url_ws = replace(replace(ema_url_ws, '.sindicalizi.com.br',''), 'http://', 'http://localhost/')  where ema_url_ws like '%.sindicalizi.com.br/sispagintegracao/';"
-}
-
-function mysql_update_urlws_remote {
-	local banco=${1:-sispag}
-	echo "Alterando ema_url_ws de $banco para remote" && s "$banco" "update ema_empresa set ema_url_ws = replace(replace(ema_url_ws, 'localhost/', ''), '/sispagintegracao/', '.sindicalizi.com.br/sispagintegracao/') where ema_url_ws like 'http://localhost/%' and ema_url_ws not like 'http://localhost/sispagintegracao/';"
-}
-
-alias upl=mysql_upload
-
 function mysql_upload_local {
 	echo "Fazendo restore local"
 	upl $@
 }
-alias upll=mysql_upload_local
 
 function mysql_upload_remote {
 	
@@ -581,55 +585,92 @@ function mysql_upload_remote {
 			;;
 	esac
 }
-alias uplr=mysql_upload_remote
 
-function dump {
-	bkpr $@ 
-	upll $@ -path "$fullpath"
+function mysql_use {
+	use_database="$1"
 }
 
-function dump_migracao {
-	m "$1" create database if not exists sindical_"$1"_migracao
-	bkpr $@ -d -f
-	upll $@ -b "$1"_migracao -path "$fullpath"
-	bkpr $@ -f
-	upll $@ -b "$1"_migracao -path "$fullpath"
+function mysql_restore {
+	bkpl $@ -b "$1"_migracao
+	uplr $@ -path "$fullpath"
 }
 
-function init_database_migracao {
-	if [[ "$1" != "" ]]; then
-		banco=${2:-sinpoldf}
-		m "$1" create database if not exists sindical_"$1"_migracao
-		bkpl $@ -d -f -b "$banco"
-		upll $@ -b "$1"_migracao -path "$fullpath"
-		bkpl $@ -f -b "$banco"
-		upll $@ -b "$1"_migracao -path "$fullpath"
+function mysql_restore_migracao {
+	bkpl $@ -b "$1"_migracao
+	uplr $@ -path "$fullpath"
+}
+
+function open_config {
+	vim "$path_config"
+}
+
+function open_bash {
+	subl ~/.bashrc
+}
+
+function open_wiki {
+	if [[ "$windows" == true ]] ; then
+		start "$wiki_url"
+	else 
+		if [[ "$mac" == true ]] ; then
+			open "$wiki_url"
+		else
+			xdg-open "$wiki_url"
+		fi
 	fi
 }
 
-alias dumpm=dump_migracao
-
-function restore {
-	bkpl $@ -b "$1"_migracao
-	uplr $@ -path "$fullpath"
+function path_home {
+	cd ~
 }
 
-function restore_migracao {
-	bkpl $@ -b "$1"_migracao
-	uplr $@ -path "$fullpath"
+function path_migration {
+	moobidb --no-ansi "$@"
 }
-alias restorem=restore_migracao
 
-#doc
+function path_root {
+	cd $path_root/"$1"
+}
+
+function sublime_commit {
+	local path="${PWD##/}"
+	tar -zcvf "$path_profile"/Sublime_"$whoami".tar.gz -C ~/AppData/Roaming/Sublime\ Text\ 3/ Packages Installed\ Packages
+	read -r -p "Deseja commitar? [S/n] " response
+	case $response in
+		[sS][iI][mM]|[sS])
+			git -C "$path_profile" add .
+			git -C "$path_profile" commit -am "Sublime preferences"
+			git -C "$path_profile" pull origin master
+			git -C "$path_profile" push
+		;;
+	esac
+}
+
+function sublime_update {
+	local user="$1"
+	if [[ "$user" == "" ]] ; then
+		user='allan' # "$whoami"
+	fi
+	if [[ ! -f "$path_profile"/Sublime_"$user".tar.gz ]]; then
+		echo "O sublime de $user não está disponível"
+	else
+		tar -zxvf  "$path_profile"/Sublime_"$user".tar.gz -C ~/AppData/Roaming/Sublime\ Text\ 3/
+		clear
+		echo "Sublime atualizado para o de ${user}!"
+	fi
+}
+
 function help {
-	if [[ "$1" != "" ]] ; then
+	if [[ "$1" != "" && -f "$path_profile"/help/"$1" ]] ; then
 		if [[ -f "$path_profile"/help/"$1" ]]; then
 			echo -e $(cat "$path_profile"/help/"$1")
-		else
-			echo "$1: Ainda não documentada"
+		# else
+		# 	echo "$1: Ainda não documentada"
 		fi
 	else
-		local funcoes=($(grep "function\ " ~/.bashrc | sed 's/function//' | sed 's/ {//'))
+		local funcao=''
+		[[ "$1" != "-a" ]] && funcao="$1"
+		local funcoes=($(grep "function\ .*$funcao" ~/.bashrc | sed 's/function//' | sed 's/ {//'))
 		local falta_documentar=
 		for i in "${funcoes[@]}"
 		do :
@@ -639,14 +680,16 @@ function help {
 				falta_documentar="$falta_documentar\n$i: Ainda não documentada"
 			fi
 		done
-
-		# echo -e "$falta_documentar"
+		if [[ "$1" == "-a" ]]; then
+			echo -e "$falta_documentar"
+		fi
 	fi
 }
 
 function atalhos {
-	# aaAtalhos=$(grep "alias\ .*=[^$].*_" ~/.bashrc | sed 's/alias //')
+	echo "Em breve!"
 	# aAtalho="${aaAtalhos	[0]}"
+	# aaAtalhos=$(grep "alias\ .*=[^$].*_" ~/.bashrc | sed 's/alias //')
 	x=0
 	atalhos=()
 	grep "alias\ .*=[^$].*_" ~/.bashrc | sed 's/alias //' | while read -r line ; do
@@ -663,3 +706,83 @@ function atalhos {
 	done
 	# echo "${atalhos[0,0]} ${atalhos[0,1]}" # will print 0 1
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+if [[ "$atualiza_bashrc" == true ]] ; then
+	init_bash 
+	if [[ $(diff "$path_profile"/.bashrc "$path_profile"/../.bashrc) ]]; then 
+		bash_commit
+	else 
+		bash_update
+	fi
+	clear
+fi
+
+if [[ "$mostrar_mensagem_ultimo_commit" == true ]] ; then
+	# echo $(git -C ~/my_bash/ log  @{1}.. --reverse --no-merges)
+	# echo $(git -C "$path_profile" log -1 --pretty=format:"%C(bold)%s %C(bold)%C(Yellow ul)%an, %ar")
+	bash_changelog $(echo "--after='"$(cat ~/.bashversion)"'" || echo "-1")
+fi
+
+
+
+
+
+#functions
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

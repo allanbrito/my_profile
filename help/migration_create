@@ -1,2 +1,2 @@
 \e[1m migration_create {\e[4;36mmigratec\e[0;1m}\e[0;2m: Cria arquivo dentro do padrão na pasta migration
-Aceita o nome de uma base para dar mark local\e[0m
+\n > Aceita o nome de uma base para dar mark local\e[0m

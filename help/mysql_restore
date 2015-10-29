@@ -1,0 +1,2 @@
+\e[1m mysql_restore {\e[4;36mrestore\e[0;1m\e[0;1m}\e[0;2m:\e[0;2m\e[0;2m Faz backup local e restore remote. 
+\n > Pergunta se tem certeza\e[0m
