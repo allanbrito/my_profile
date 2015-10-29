@@ -113,7 +113,8 @@ function bash_commit {
 function bash_reset {
 	clear
 	if [[ "$windows" == true ]] ; then
-		"C:\Program Files (x86)\Git\bin\sh.exe" --login -i
+		~/my_bash/bash/Bash.exe
+		# "C:\Program Files (x86)\Git\bin\sh.exe" --login -i
 	fi
 }
 
@@ -182,7 +183,10 @@ function init_bash {
 		bash_update_version
 		cp "$path_profile"/.bashrc "$path_profile"/../.bashrc
 	fi
-	cp ~/my_bash/bash/Bash.lnk ~/Desktop/
+	if [[ ! -f ~/Desktop/Bash.lnk ]]; then
+		cp ~/my_bash/bash/Bash.lnk ~/Desktop/
+		exit
+	fi
 }
 
 function init_config {
