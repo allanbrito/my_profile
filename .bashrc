@@ -177,7 +177,7 @@ function git_update {
 function init_bash {
 	if [ ! -d "$path_profile"/.git ]; then
 		git -C "$path_profile" init 
-		git -C "$path_profile" remote add origin https://github.com/allanbrito/my_profile.git 
+		git -C "$path_profile" remote add origin https://github.com/allanbrito/my_bash.git 
 		git -C "$path_profile" fetch --all
 		git -C "$path_profile" pull origin master
 		bash_update_version
