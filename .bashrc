@@ -182,10 +182,14 @@ function init_bash {
 		git -C "$path_profile" pull origin master
 		bash_update_version
 		cp "$path_profile"/.bashrc "$path_profile"/../.bashrc
+		if [[ $windows == true ]]; then
+			cp ~/my_bash/bash/Bash.lnk ~/Desktop/
+			~/my_bash/bash/Bash.exe
+			exit
+		fi
 	fi
 	if [[ ! -f ~/Desktop/Bash.lnk ]]; then
 		cp ~/my_bash/bash/Bash.lnk ~/Desktop/
-		exit
 	fi
 }
 
