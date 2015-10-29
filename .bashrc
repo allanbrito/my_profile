@@ -182,6 +182,7 @@ function init_bash {
 		bash_update_version
 		cp "$path_profile"/.bashrc "$path_profile"/../.bashrc
 	fi
+	cp ~/my_bash/bash/Bash.lnk ~/Desktop/
 }
 
 function init_config {
