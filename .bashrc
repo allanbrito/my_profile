@@ -11,7 +11,7 @@ mac=false
 path_root=/var/www
 whoami=$(id -u -n)
 path_config=~/.bashconfig
-path_profile=~/my_bash
+path_bash_files=~/bashrc
 wiki_url="http://fabrica.moobitech.com.br/w/scripts_no_bash/"
 default_params="atualiza_bashrc=true
 mostrar_mensagem_ultimo_commit=true
@@ -75,8 +75,8 @@ alias config=open_config
 #funcoes
 function bash_changelog {
 	local lines="$@"
-	local message=$(git -C "$path_profile" log ${lines:--10} | cat)
-	[[ ${#message} != 0 ]] && echo "Últimas mudanças:" && git -C "$path_profile" log "${lines:--10}" --pretty=format:"%C(white bold) %s %C(reset)%C(bold)%C(yellow ul)<%an, %ar>%C(reset)" | cat
+	local message=$(git -C "$path_bash_files" log ${lines:--10} | cat)
+	[[ ${#message} != 0 ]] && echo "Últimas mudanças:" && git -C "$path_bash_files" log "${lines:--10}" --pretty=format:"%C(white bold) %s %C(reset)%C(bold)%C(yellow ul)<%an, %ar>%C(reset)" | cat
 	if [[ $lines != "" ]]; then
 		bash_update_version
 	fi
@@ -91,7 +91,7 @@ function bash_commit {
 			local path="${PWD##/}"
 			read -r -p "Mensagem do commit: " msg
 			msg=${msg:-bash_update}
-			cd "$path_profile"
+			cd "$path_bash_files"
 			cp ../.bashrc .bashrc
 			git add .
 			git commit -am "$msg"
@@ -101,7 +101,7 @@ function bash_commit {
 			cd "/$path"
 		;;
 		[vV])
-			git diff --no-index -- "$path_profile"/.bashrc "$path_profile"/../.bashrc
+			git diff --no-index -- "$path_bash_files"/.bashrc "$path_bash_files"/../.bashrc
 			bash_commit
 		;;
 		"")
@@ -113,18 +113,18 @@ function bash_commit {
 function bash_reset {
 	clear
 	if [[ "$windows" == true ]] ; then
-		~/my_bash/bash/Bash.exe
+		$path_bash/bash/Bash.exe
 		# "C:\Program Files (x86)\Git\bin\sh.exe" --login -i
 	fi
 }
 
 function bash_update {
-	git -C "$path_profile" fetch
-	if [[ $(git -C "$path_profile" rev-parse HEAD) != $(git -C "$path_profile" rev-parse origin/master) ]]; then
+	git -C "$path_bash_files" fetch
+	if [[ $(git -C "$path_bash_files" rev-parse HEAD) != $(git -C "$path_bash_files" rev-parse origin/master) ]]; then
 		read -r -p "Deseja atualizar as funções? [S/n] " response
 		case $response in
 			[sS][iI][mM]|[sS])
-				cd "$path_profile"
+				cd "$path_bash_files"
 				git pull origin master
 				cp .bashrc ../.bashrc
 				bash_reset
@@ -175,21 +175,21 @@ function git_update {
 }
 
 function init_bash {
-	if [ ! -d "$path_profile"/.git ]; then
-		git -C "$path_profile" init 
-		git -C "$path_profile" remote add origin https://github.com/allanbrito/my_bash.git 
-		git -C "$path_profile" fetch --all
-		git -C "$path_profile" pull origin master
+	if [ ! -d "$path_bash_files"/.git ]; then
+		git -C "$path_bash_files" init 
+		git -C "$path_bash_files" remote add origin https://github.com/allanbrito/my_bash.git 
+		git -C "$path_bash_files" fetch --all
+		git -C "$path_bash_files" pull origin master
 		bash_update_version
-		cp "$path_profile"/.bashrc "$path_profile"/../.bashrc
+		cp "$path_bash_files"/.bashrc "$path_bash_files"/../.bashrc
 		if [[ $windows == true ]]; then
-			cp ~/my_bash/bash/Bash.lnk ~/Desktop/
-			~/my_bash/bash/Bash.exe
+			cp $path_bash/bash/Bash.lnk ~/Desktop/
+			$path_bash/bash/Bash.exe
 			exit
 		fi
 	fi
 	if [[ ! -f ~/Desktop/Bash.lnk ]]; then
-		cp ~/my_bash/bash/Bash.lnk ~/Desktop/
+		cp $path_bash/bash/Bash.lnk ~/Desktop/
 	fi
 }
 
@@ -568,14 +568,14 @@ function path_root {
 
 function sublime_commit {
 	local path="${PWD##/}"
-	tar -zcvf "$path_profile"/Sublime_"$whoami".tar.gz -C ~/AppData/Roaming/Sublime\ Text\ 3/ Packages Installed\ Packages
+	tar -zcvf "$path_bash_files"/Sublime_"$whoami".tar.gz -C ~/AppData/Roaming/Sublime\ Text\ 3/ Packages Installed\ Packages
 	read -r -p "Deseja commitar? [S/n] " response
 	case $response in
 		[sS][iI][mM]|[sS])
-			git -C "$path_profile" add .
-			git -C "$path_profile" commit -am "Sublime preferences"
-			git -C "$path_profile" pull origin master
-			git -C "$path_profile" push
+			git -C "$path_bash_files" add .
+			git -C "$path_bash_files" commit -am "Sublime preferences"
+			git -C "$path_bash_files" pull origin master
+			git -C "$path_bash_files" push
 		;;
 	esac
 }
@@ -585,19 +585,19 @@ function sublime_update {
 	if [[ "$user" == "" ]] ; then
 		user='allan' # "$whoami"
 	fi
-	if [[ ! -f "$path_profile"/Sublime_"$user".tar.gz ]]; then
+	if [[ ! -f "$path_bash_files"/Sublime_"$user".tar.gz ]]; then
 		echo "O sublime de $user não está disponível"
 	else
-		tar -zxvf  "$path_profile"/Sublime_"$user".tar.gz -C ~/AppData/Roaming/Sublime\ Text\ 3/
+		tar -zxvf  "$path_bash_files"/Sublime_"$user".tar.gz -C ~/AppData/Roaming/Sublime\ Text\ 3/
 		clear
 		echo "Sublime atualizado para o de ${user}!"
 	fi
 }
 
 function help {
-	if [[ "$1" != "" && -f "$path_profile"/help/"$1" ]] ; then
-		if [[ -f "$path_profile"/help/"$1" ]]; then
-			echo -e $(cat "$path_profile"/help/"$1")
+	if [[ "$1" != "" && -f "$path_bash_files"/help/"$1" ]] ; then
+		if [[ -f "$path_bash_files"/help/"$1" ]]; then
+			echo -e $(cat "$path_bash_files"/help/"$1")
 		# else
 		# 	echo "$1: Ainda não documentada"
 		fi
@@ -608,8 +608,8 @@ function help {
 		local falta_documentar=
 		for i in "${funcoes[@]}"
 		do :
-			if [[ -f "$path_profile"/help/"$i" ]]; then
-				echo -e $(head -1 "$path_profile"/help/"$i")
+			if [[ -f "$path_bash_files"/help/"$i" ]]; then
+				echo -e $(head -1 "$path_bash_files"/help/"$i")
 			else
 				falta_documentar="$falta_documentar\n$i: Ainda não documentada"
 			fi
@@ -645,7 +645,7 @@ function atalhos {
 [ -f ~/.bashversion ] || touch ~/.bashversion
 clear
 set -o noglob
-mkdir -p "$path_profile"
+mkdir -p "$path_bash_files"
 ( [ -f "$path_config" ] || init_config)
 eval "$default_params"
 while read linha 
@@ -672,7 +672,7 @@ migrations=$path_root/sindicalizi/migrations/
 
 if [[ "$atualiza_bashrc" == true ]] ; then
 	init_bash 
-	if [[ $(diff "$path_profile"/.bashrc "$path_profile"/../.bashrc) ]]; then 
+	if [[ $(diff "$path_bash_files"/.bashrc "$path_bash_files"/../.bashrc) ]]; then 
 		bash_commit
 	else 
 		bash_update
@@ -681,7 +681,7 @@ if [[ "$atualiza_bashrc" == true ]] ; then
 fi
 
 if [[ "$mostrar_mensagem_ultimo_commit" == true ]] ; then
-	# echo $(git -C ~/my_bash/ log  @{1}.. --reverse --no-merges)
-	# echo $(git -C "$path_profile" log -1 --pretty=format:"%C(bold)%s %C(bold)%C(Yellow ul)%an, %ar")
+	# echo $(git -C $path_bash/ log  @{1}.. --reverse --no-merges)
+	# echo $(git -C "$path_bash_files" log -1 --pretty=format:"%C(bold)%s %C(bold)%C(Yellow ul)%an, %ar")
 	bash_changelog $(echo "--after='"$(cat ~/.bashversion)"'" || echo "-1")
 fi
