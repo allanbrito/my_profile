@@ -27,7 +27,6 @@ use_database=
 #atalhos
 alias ls='ls -F --show-control-chars'
 alias gts='git status '
-alias gitk='gitk &'	
 alias e='exit'
 alias mysql=mysql
 alias mysqldump=mysqldump
