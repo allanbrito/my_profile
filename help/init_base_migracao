@@ -1,1 +1,1 @@
-\e[1m init_base_migracao {\e[4;36mmmigracao\e[0;1m\e[0;1m}\e[0;2m:\e[0;2m Cria base com o "_migracao" e sobe backup\e[0;m
+\e[1m init_base_migracao {\e[4;36mbase_migracao\e[0;1m\e[0;1m}\e[0;2m:\e[0;2m Cria base com o "_migracao" e sobe backup\e[0;m

@@ -3,7 +3,7 @@
 						#  Se a váriável atualiza_bashrc estiver setada com true, qualquer alteração será perdida  #
 						############################################################################################
 
-#variables
+#variaveis
 now=$(date +"%Y%m%d_%H%M")
 windows=false
 linux=false
@@ -24,130 +24,56 @@ remote_user=sindical
 remote_pass="
 use_database=
 
-# PS1="\n\[\e[1;30m\][$$:$PPID - \j:\!\[\e[1;30m\]]\[\e[0;36m\] \T \[\e[1;30m\][\[\e[1;34m\]\u@\H\[\e[1;30m\]:\[\e[0;37m\]${SSH_TTY:-o} \[\e[0;32m\]+${SHLVL}\[\e[1;30m\]] \[\e[1;37m\]\w\[\e[0;37m\] \n\$ "
-
 #atalhos
 alias ls='ls -F --show-control-chars'
 alias gts='git status '
 alias gitk='gitk &'	
-
 alias e='exit'
 alias mysql=mysql
 alias mysqldump=mysqldump
 alias php=php
 alias home=path_home
 alias bash=open_bash
-
 alias moobidb=$path_root/sindicalizi/moobilib/scripts/moobidb.php
-
 alias bash_update_version="( [ -f ~/.bashversion ] || touch ~/.bashversion) && echo $(date -d '-1 min' '+%Y-%m-%dT%H:%M') > ~/.bashversion"
-
 alias commit=bash_commit
-
 alias use=mysql_use
-
 alias wiki=open_wiki
-
 alias init=init_bash
-
 alias reset=bash_reset
-
 alias update=bash_update
-
 alias subl_commit=sublime_commit
-
 alias subl_update=sublime_update
-
 alias changelog=bash_changelog
-
 alias m=mysql_local
-
 alias s=mysql_remote
-
 alias x=path_root
-
 alias gtc="git_commit --"
-
 alias gtu=git_update
-
 alias migration=path_migration
-
 alias migrate=migration_local_todas
-
 alias migrates=migration_remote_todas
-
 alias migratec=migration_create
-
 alias bkp=mysql_backup
-
 alias bkpl=mysql_backup_local
-
 alias bkpr=mysql_backup_remote
-
 alias upl=mysql_upload
-
 alias upll=mysql_upload_local
-
 alias uplr=mysql_upload_remote
-
 alias dump=mysql_dump
-
 alias dumpm=mysql_dump_migracao
-
 alias restore=mysql_restore
-
 alias restorem=mysql_restore_migracao
-alias mmigracao=init_base_migracao
+alias base_migracao=init_base_migracao
 alias urlsispagl=mysql_update_urlws_local
 alias urlsispagr=mysql_update_urlws_remote
 alias h=help
 alias a=atalhos
 alias r=reset
 alias b=bash
-
-
-#exec
-
-
-[ -f ~/.bashversion ] || touch ~/.bashversion
-
-
 alias config=open_config
-clear
-set -o noglob
 
-#iniciar arquivo de configuração
-mkdir -p "$path_profile"
-( [ -f "$path_config" ] || init_config)
-eval "$default_params"
-while read linha 
-do
-    eval "$linha"
-done < "$path_config"
-case "$(uname -s)" in
-	Darwin)
-		mac=true
-	;;
-	Linux)
-		linux=true
-	;;
-	CYGWIN*|MINGW32*|MSYS*)
-		windows=true
-		path_root=/c/xampp/htdocs
-		alias mysql=$path_root/../mysql/bin/mysql.exe
-		alias mysqldump=$path_root/../mysql/bin/mysqldump.exe
-		alias php=$path_root/../php/php.exe
-		alias subl="/C/Program\ Files/Sublime\ Text\ 3/subl.exe"
-	;;
-esac
-
-
-
-#alias|| variables pt2
-migrations=$path_root/sindicalizi/migrations/
-
-
-
+#funcoes
 function bash_changelog {
 	local lines="$@"
 	local message=$(git -C "$path_profile" log ${lines:--10} | cat)
@@ -186,7 +112,7 @@ function bash_commit {
 }
 
 function bash_reset {
-		clear
+	clear
 	if [[ "$windows" == true ]] ; then
 		"C:\Program Files (x86)\Git\bin\sh.exe" --login -i
 	fi
@@ -707,19 +633,34 @@ function atalhos {
 	# echo "${atalhos[0,0]} ${atalhos[0,1]}" # will print 0 1
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+#exec
+[ -f ~/.bashversion ] || touch ~/.bashversion
+clear
+set -o noglob
+mkdir -p "$path_profile"
+( [ -f "$path_config" ] || init_config)
+eval "$default_params"
+while read linha 
+do
+    eval "$linha"
+done < "$path_config"
+case "$(uname -s)" in
+	Darwin)
+		mac=true
+	;;
+	Linux)
+		linux=true
+	;;
+	CYGWIN*|MINGW32*|MSYS*)
+		windows=true
+		path_root=/c/xampp/htdocs
+		alias mysql=$path_root/../mysql/bin/mysql.exe
+		alias mysqldump=$path_root/../mysql/bin/mysqldump.exe
+		alias php=$path_root/../php/php.exe
+		alias subl="/C/Program\ Files/Sublime\ Text\ 3/subl.exe"
+	;;
+esac
+migrations=$path_root/sindicalizi/migrations/
 
 if [[ "$atualiza_bashrc" == true ]] ; then
 	init_bash 
@@ -736,53 +677,3 @@ if [[ "$mostrar_mensagem_ultimo_commit" == true ]] ; then
 	# echo $(git -C "$path_profile" log -1 --pretty=format:"%C(bold)%s %C(bold)%C(Yellow ul)%an, %ar")
 	bash_changelog $(echo "--after='"$(cat ~/.bashversion)"'" || echo "-1")
 fi
-
-
-
-
-
-#functions
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
